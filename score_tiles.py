@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import pathlib
 import sys
 import tensorflow
 import time
@@ -73,7 +74,16 @@ def main():
     db = database.Database(args.database)
 
     tiles = list(db.tiles())
-    paths = [tile_to_path(t, 'NiB') for t in tiles]
+    paths = []
+    for tile in tiles:
+        path = tile_to_path(tile, 'NiB')
+        if pathlib.Path(path).exists():
+            paths.append(path)
+
+    skipped = len(tiles) - len(paths)
+    if skipped:
+        print('Skipping {} tiles without image data'.format(skipped))
+
     dataset = tensorflow.data.Dataset.from_tensor_slices(paths)
     dataset = dataset.map(
             load_nib_data,
@@ -82,7 +92,7 @@ def main():
 
     m = model.classify(args.model)
 
-    progress = Progress(len(tiles))
+    progress = Progress(len(paths))
     try:
         image_index = 0
         for batch in dataset:
