@@ -59,8 +59,6 @@ class Database(object):
                          from tiles
                          natural left join scores
                          natural left join with_solar
-                         where x > 138816 and x < 138976
-                               and y > 76182 and y < 76279
                          order by has_solar desc, score desc
                       ''')
             tiles = c.fetchall()
@@ -86,8 +84,6 @@ class Database(object):
                             select 1 as t, z, x, y
                             from with_solar)
                          where t is null and score is not null
-                               and x > 138816 and x < 138976
-                               and y > 76182 and y < 76279
                          order by score desc
                          limit ?
                       ''',
