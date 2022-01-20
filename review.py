@@ -60,7 +60,7 @@ def review_single_tile(nib_api_key, db, z, x, y, score):
         return None
 
 
-def review_tile(nib_api_key, db, z, x, y, around, score=0.0):
+def review_tile(nib_api_key, db, z, x, y, score=0.0):
     tiles_todo.append((z, x, y))
 
     skipped = 0
@@ -80,23 +80,23 @@ def review_tile(nib_api_key, db, z, x, y, around, score=0.0):
         except sqlite3.IntegrityError as e:
             print(e)
 
-        if has_solar and around:
+        if has_solar:
             add_surrounding_tiles(z, x, y)
 
     return skipped
 
 
-def review_by_score(nib_api_key, db, around):
+def review_by_score(nib_api_key, db):
     skipped = 0
     while True:
         tiles = db.training_candidates(limit=skipped + 1)
         for z, x, y, score in tiles:
-            skipped += review_tile(nib_api_key, db, z, x, y, around, score)
+            skipped += review_tile(nib_api_key, db, z, x, y, score)
 
 
-def review_position(nib_api_key, db, lat, lon, around):
+def review_position(nib_api_key, db, lat, lon):
     x, y = util.deg2tile(lat, lon, 18)
-    review_tile(nib_api_key, db, 18, x, y, around)
+    review_tile(nib_api_key, db, 18, x, y)
 
 
 def main():
@@ -106,7 +106,6 @@ def main():
     parser.add_argument('--lon', type=float)
     parser.add_argument('--tile-x', type=int)
     parser.add_argument('--tile-y', type=int)
-    parser.add_argument('--around', action='store_true')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     args = parser.parse_args()
 
@@ -114,11 +113,11 @@ def main():
     nib_api_key = download_tiles.load_key(args.NiB_key)
 
     if args.lat and args.lon:
-        review_position(nib_api_key, db, args.lat, args.lon, args.around)
+        review_position(nib_api_key, db, args.lat, args.lon)
     elif args.tile_x and args.tile_y:
-        review_tile(nib_api_key, db, args.tile_x, args.tile_y, args.around)
+        review_tile(nib_api_key, db, args.tile_x, args.tile_y)
     else:
-        review_by_score(nib_api_key, db, args.around)
+        review_by_score(nib_api_key, db)
 
 
 if __name__ == '__main__':
