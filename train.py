@@ -43,8 +43,8 @@ def main():
     parser.add_argument('--load-model', type=str)
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
 
-    parser.add_argument('--batch-size', default=32, type=int)
-    parser.add_argument('--step-count', default=100000, type=int)
+    parser.add_argument('--batch-size', default=128, type=int)
+    parser.add_argument('--step-count', default=200000, type=int)
 
     parser.add_argument('--tensorboard', action='store_true')
     parser.add_argument('--save-intermediate', action='store_true')
