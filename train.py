@@ -120,7 +120,7 @@ def main():
             update_freq='batch'))
     if args.save_intermediate:
         callbacks.append(tf.keras.callbacks.ModelCheckpoint(
-            filepath='data/model_{epoch}_{val_loss:.4f}.hdf5',
+            filepath='data/model_{epoch}_{val_accuracy:.4f}.hdf5',
             monitor='binary_io_u'))
 
     m.fit(dataset,
