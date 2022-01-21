@@ -24,7 +24,7 @@ data/.download.marker : download_tiles.py database.py Makefile
 	touch data/.download.marker
 
 data/.training.marker : data/.download.marker train.py Makefile
-	python3 train.py
+	python3 train.py --tensorboard --save-intermediate
 	touch data/.training.marker
 
 data/.score.marker : data/.training.marker Makefile
