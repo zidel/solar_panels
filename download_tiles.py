@@ -79,7 +79,7 @@ def main():
     parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--population', default='population.csv')
-    parser.add_argument('--min-population', default=1000)
+    parser.add_argument('--min-population', default=10000)
     parser.add_argument('--zoom', action='append', type=int)
     args = parser.parse_args()
 
