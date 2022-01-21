@@ -76,13 +76,12 @@ def main():
         len(tiles_without_solar),
         ))
 
-    random.shuffle(tiles_with_solar)
-    random.shuffle(tiles_without_solar)
     images_per_category = max(len(tiles_with_solar), len(tiles_without_solar))
-
     tiles = tiles_with_solar[:images_per_category] \
         + tiles_without_solar[:images_per_category]
     training_set_size = int(len(tiles) * 0.9)
+
+    random.shuffle(tiles)
     training_tiles = tiles[:training_set_size]
     validation_tiles = tiles[training_set_size:]
     print('Training with {} tiles, validating with {}'.format(
