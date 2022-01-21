@@ -11,13 +11,17 @@ tiles_done = []
 tiles_todo = []
 
 
+def add_tile(z, x, y):
+    if (z, x, y) not in tiles_done + tiles_todo:
+        tiles_todo.append((z, x, y))
+
+
 def add_surrounding_tiles(z, x, y):
     for d_x in [-1, 0, 1]:
         for d_y in [-1, 0, 1]:
             new_x = x + d_x
             new_y = y + d_y
-            if (z, new_x, new_y) not in tiles_done + tiles_todo:
-                tiles_todo.append((z, new_x, new_y))
+            add_tile(z, new_x, new_y)
 
 
 def review_single_tile(nib_api_key, db, z, x, y, score):
@@ -61,7 +65,7 @@ def review_single_tile(nib_api_key, db, z, x, y, score):
 
 
 def review_tile(nib_api_key, db, z, x, y, score=0.0):
-    tiles_todo.append((z, x, y))
+    add_tile(z, x, y)
 
     skipped = 0
     while tiles_todo:
