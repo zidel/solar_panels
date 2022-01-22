@@ -76,6 +76,15 @@ def main():
     tiles = list(db.tiles())
     paths = []
     for tile in tiles:
+        # Limit to greater Oslo area to reduce runtime for now
+        x = tile[1]
+        if x < 138390 or x > 139284:
+            continue
+
+        y = tile[2]
+        if y < 75810 or y > 76610:
+            continue
+
         path = tile_to_path(tile, 'NiB')
         if pathlib.Path(path).exists():
             paths.append(path)
