@@ -66,17 +66,16 @@ def main():
                         str(left_right),
                         str(up_down),
                         )
-                    if has_solar:
-                        tiles_with_solar.append(data)
-                    elif rotations == 0 and left_right == 0 and up_down == 0:
-                        tiles_without_solar.append(data)
+                    tiles_with_solar.append(data)
 
+    random.shuffle(tiles_with_solar)
+    random.shuffle(tiles_without_solar)
     print('Have {} solar tiles and {} background'.format(
         len(tiles_with_solar),
         len(tiles_without_solar),
         ))
 
-    images_per_category = max(len(tiles_with_solar), len(tiles_without_solar))
+    images_per_category = min(len(tiles_with_solar), len(tiles_without_solar))
     tiles = tiles_with_solar[:images_per_category] \
         + tiles_without_solar[:images_per_category]
     training_set_size = int(len(tiles) * 0.9)
