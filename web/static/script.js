@@ -5,6 +5,37 @@ function onload()
     document.addEventListener("keypress", key_handler);
 }
 
+function update_current_tile(tile)
+{
+    z = tile['z'];
+    x = tile['x'];
+    y = tile['y'];
+    score = tile['score'];
+    bbox_top = tile['top'];
+    bbox_left = tile['left'];
+    bbox_bottom = tile['bottom'];
+    bbox_right = tile['right'];
+
+    document.getElementById('tile_z').textContent = `${z}`;
+    document.getElementById('tile_x').textContent = `${x}`;
+    document.getElementById('tile_y').textContent = `${y}`;
+    document.getElementById('tile_bbox').textContent = `${bbox_top},${bbox_left},${bbox_bottom},${bbox_right}`;
+
+    document.getElementById('review_tile').src = `/api/tiles/${z}/${x}/${y}.jpeg`;
+    document.getElementById('review_score').textContent = `${score}`
+
+    document.getElementById('context_00').src = `/api/tiles/${z}/${x - 1}/${y - 1}.jpeg`;
+    document.getElementById('context_01').src = `/api/tiles/${z}/${x + 0}/${y - 1}.jpeg`;
+    document.getElementById('context_02').src = `/api/tiles/${z}/${x + 1}/${y - 1}.jpeg`;
+
+    document.getElementById('context_10').src = `/api/tiles/${z}/${x - 1}/${y + 0}.jpeg`;
+    document.getElementById('context_12').src = `/api/tiles/${z}/${x + 1}/${y + 0}.jpeg`;
+
+    document.getElementById('context_20').src = `/api/tiles/${z}/${x - 1}/${y + 1}.jpeg`;
+    document.getElementById('context_21').src = `/api/tiles/${z}/${x + 0}/${y + 1}.jpeg`;
+    document.getElementById('context_22').src = `/api/tiles/${z}/${x + 1}/${y + 1}.jpeg`;
+}
+
 function get_next_to_check()
 {
     document.getElementById('tile_z').textContent = "";
@@ -13,36 +44,13 @@ function get_next_to_check()
     document.getElementById('tile_bbox').textContent = "";
 
     fetch("http://127.0.0.1:5000/api/review/next_tile")
-        .then((r) => r.json())
-        .then(function (body) {
-            z = body['z'];
-            x = body['x'];
-            y = body['y'];
-            score = body['score'];
-            bbox_top = body['top'];
-            bbox_left = body['left'];
-            bbox_bottom = body['bottom'];
-            bbox_right = body['right'];
-
-            document.getElementById('tile_z').textContent = `${z}`;
-            document.getElementById('tile_x').textContent = `${x}`;
-            document.getElementById('tile_y').textContent = `${y}`;
-            document.getElementById('tile_bbox').textContent = `${bbox_top},${bbox_left},${bbox_bottom},${bbox_right}`;
-
-            document.getElementById('review_tile').src = `/api/tiles/${z}/${x}/${y}.jpeg`;
-            document.getElementById('review_score').textContent = `${score}`
-
-            document.getElementById('context_00').src = `/api/tiles/${z}/${x - 1}/${y - 1}.jpeg`;
-            document.getElementById('context_01').src = `/api/tiles/${z}/${x + 0}/${y - 1}.jpeg`;
-            document.getElementById('context_02').src = `/api/tiles/${z}/${x + 1}/${y - 1}.jpeg`;
-
-            document.getElementById('context_10').src = `/api/tiles/${z}/${x - 1}/${y + 0}.jpeg`;
-            document.getElementById('context_12').src = `/api/tiles/${z}/${x + 1}/${y + 0}.jpeg`;
-            
-            document.getElementById('context_20').src = `/api/tiles/${z}/${x - 1}/${y + 1}.jpeg`;
-            document.getElementById('context_21').src = `/api/tiles/${z}/${x + 0}/${y + 1}.jpeg`;
-            document.getElementById('context_22').src = `/api/tiles/${z}/${x + 1}/${y + 1}.jpeg`;
-        });
+        .then(function (response) {
+            if (response.status == 200) {
+                response.json().then(update_current_tile)
+            } else if (response.status == 204) {
+                // No tiles to check
+            }
+        })
 }
 
 function current_tile()

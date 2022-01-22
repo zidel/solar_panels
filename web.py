@@ -25,6 +25,9 @@ def send_script():
 def get_next_tile_for_review():
     db = database.Database('data/tiles.db')
     tiles = db.training_candidates(limit=1)
+    if not tiles:
+        return '', 204
+
     z, x, y, score = list(tiles)[0]
 
     top, left = util.tile2deg(x, y, z)
