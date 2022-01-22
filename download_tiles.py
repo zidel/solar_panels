@@ -5,6 +5,7 @@ import os
 import pathlib
 import requests
 import sys
+import time
 
 import database
 import util
@@ -90,21 +91,34 @@ def main():
     nib_api_key = load_key(args.NiB_key)
     pop_data = read_population_data(args.population, args.min_population)
 
-    done = 0
+    ssb_tiles_done = 0
     try:
         for west, south, east, north, pop in pop_data:
-            sys.stdout.write('\r{}/{} (population {})'.format(
-                done,
-                len(pop_data),
-                pop,
-                ))
-            sys.stdout.flush()
-            done += 1
+            osm_tiles_done = 0
 
             def per_tile(z, x, y):
+                nonlocal osm_tiles_done
+                sys.stdout.write('\r{}/{}, population {}, tile {} '.format(
+                    ssb_tiles_done,
+                    len(pop_data),
+                    pop,
+                    osm_tiles_done,
+                    ))
+                sys.stdout.flush()
+
                 with db.transaction() as cursor:
                     database.add_tile(cursor, z, x, y)
-                download_single_tile(nib_api_key, z, x, y)
+
+                while True:
+                    try:
+                        download_single_tile(nib_api_key, z, x, y)
+                        break
+                    except Exception as e:
+                        sys.stdout.write('\r')
+                        print(e)
+                        time.sleep(60)
+
+                osm_tiles_done += 1
 
             for_each_tile(
                     west,
@@ -113,6 +127,9 @@ def main():
                     north,
                     args.zoom,
                     per_tile)
+
+            osm_tiles_done = 0
+            ssb_tiles_done += 1
     finally:
         sys.stdout.write('\r{}\r'.format(' ' * 40))
         sys.stdout.flush()
