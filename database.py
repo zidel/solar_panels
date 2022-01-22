@@ -61,20 +61,14 @@ class Database(object):
                          natural left join with_solar
                          order by has_solar desc, score desc
                       ''')
-            tiles = c.fetchall()
-
-        for z, x, y in tiles:
-            yield (z, x, y)
+            return c.fetchall()
 
     def trainable(self):
         with self.transaction() as c:
             c.execute('''select z, x, y, has_solar
                          from with_solar
                       ''')
-            tiles = c.fetchall()
-
-        for z, x, y, has_solar in tiles:
-            yield (z, x, y, has_solar)
+            return c.fetchall()
 
     def training_candidates(self, limit):
         with self.transaction() as c:
@@ -88,10 +82,7 @@ class Database(object):
                          limit ?
                       ''',
                       (limit,))
-            tiles = c.fetchall()
-
-        for z, x, y, score in tiles:
-            yield (z, x, y, score)
+            return c.fetchall()
 
 
 def add_tile(cursor, z, x, y):
