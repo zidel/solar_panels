@@ -37,6 +37,30 @@ def load_image_data(tile_data):
     return (nib_data, correct)
 
 
+def apply_rotation(tiles):
+    output = list(tiles)
+    for tile in tiles:
+        for rotations in range(1, 4):
+            copy = list(tile)
+            copy[2] = str(rotations)
+            output.append(tuple(copy))
+
+    return output
+
+
+def apply_flips(tiles):
+    output = list(tiles)
+    for tile in tiles:
+        for left_right in [0, 1]:
+            for up_down in [0, 1]:
+                copy = list(tile)
+                copy[3] = str(left_right)
+                copy[4] = str(up_down)
+                output.append(tuple(copy))
+
+    return output
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
@@ -55,18 +79,25 @@ def main():
     tiles_without_solar = []
     for z, x, y, has_solar in db.trainable():
         nib_path = tile_to_paths(z, x, y)
+        data = (str(nib_path),
+            'true' if has_solar else 'false',
+            '0',
+            '0',
+            '0',
+            )
+        if has_solar:
+            tiles_with_solar.append(data)
+        else:
+            tiles_without_solar.append(data)
 
-        for rotations in range(4):
-            for left_right in [0, 1]:
-                for up_down in [0, 1]:
-                    data = (
-                        str(nib_path),
-                        'true' if has_solar else 'false',
-                        str(rotations),
-                        str(left_right),
-                        str(up_down),
-                        )
-                    tiles_with_solar.append(data)
+    tiles_with_solar = apply_flips(tiles_with_solar)
+    tiles_with_solar = apply_rotation(tiles_with_solar)
+
+    if len(tiles_without_solar) < len(tiles_with_solar):
+        tiles_without_solar = apply_flips(tiles_without_solar)
+
+    if len(tiles_without_solar) < len(tiles_with_solar):
+        tiles_without_solar = apply_rotation(tiles_without_solar)
 
     random.shuffle(tiles_with_solar)
     random.shuffle(tiles_without_solar)
