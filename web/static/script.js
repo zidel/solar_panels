@@ -43,7 +43,7 @@ function get_next_to_check()
     document.getElementById('tile_y').textContent = "";
     document.getElementById('tile_bbox').textContent = "";
 
-    fetch("http://127.0.0.1:5000/api/review/next_tile")
+    fetch("/api/review/next_tile")
         .then(function (response) {
             if (response.status == 200) {
                 response.json().then(update_current_tile)
