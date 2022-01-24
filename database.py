@@ -59,7 +59,7 @@ class Database(object):
                          from tiles
                          natural left join scores
                          natural left join with_solar
-                         order by has_solar desc, score desc
+                         order by has_solar asc, score desc
                       ''')
             return c.fetchall()
 
