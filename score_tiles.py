@@ -74,6 +74,7 @@ def main():
     db = database.Database(args.database)
 
     tiles = list(db.tiles())
+    filtered_tiles = []
     paths = []
     for tile in tiles:
         # Limit to greater Oslo area to reduce runtime for now
@@ -88,6 +89,7 @@ def main():
         path = tile_to_path(tile, 'NiB')
         if pathlib.Path(path).exists():
             paths.append(path)
+            filtered_tiles.append((tile[0], x, y))
 
     skipped = len(tiles) - len(paths)
     if skipped:
@@ -108,7 +110,7 @@ def main():
             results = m.predict(batch, batch_size=args.batch_size)
             with db.transaction() as c:
                 for result in results:
-                    process_prediction(c, tiles[image_index], result)
+                    process_prediction(c, filtered_tiles[image_index], result)
                     image_index += 1
 
             progress.finished(len(results))
