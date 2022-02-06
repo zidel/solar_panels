@@ -13,22 +13,22 @@ class Progress(object):
     def __init__(self, total):
         self._start_time = time.time()
         self._total = total
-        self._done = 0
+        self.done = 0
 
     def finished(self, count):
-        self._done += count
+        self.done += count
 
-        if self._done >= self._total:
+        if self.done >= self._total:
             self.clear()
             return
 
         since_start = time.time() - self._start_time
-        rate = self._done / since_start
-        seconds_left = (self._total - self._done) / rate
+        rate = self.done / since_start
+        seconds_left = (self._total - self.done) / rate
         eta = datetime.timedelta(seconds=seconds_left)
 
         sys.stderr.write('\r{}/{} done, {:.2f} steps/s, {} remaining{}'.format(
-            self._done,
+            self.done,
             self._total,
             rate,
             eta,
@@ -109,6 +109,7 @@ def main():
                 break
     finally:
         progress.clear()
+        print('Scored {} tiles'.format(progress.done))
 
 
 if __name__ == '__main__':
