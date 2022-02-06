@@ -88,8 +88,9 @@ class Database(object):
                          natural left join (
                             select 1 as t, z, x, y
                             from with_solar)
-                         where t is null and score is not null
-                         order by score desc
+                         where t is null
+                               and score is not null
+                         order by abs(score - 0.5) asc
                          limit ?
                       ''',
                       (limit,))
