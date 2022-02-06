@@ -96,6 +96,13 @@ class Database(object):
                       (limit,))
             return c.fetchall()
 
+    def remove_score(self, z, x, y):
+        with self.transaction() as c:
+            c.execute('''delete from scores
+                         where z = ? and x = ? and y = ?
+                      ''',
+                      (z, x, y))
+
 
 def add_tile(cursor, z, x, y):
     assert(type(z) == int)

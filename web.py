@@ -53,10 +53,22 @@ def accept_tile_response():
     y = body['y']
     response = body['response']
 
+    if response == 'true':
+        has_solar = True
+    elif response == 'false':
+        has_solar = False
+    elif response == 'skip':
+        has_solar = None
+    else:
+        return 400, 'Bad "response" value'
+
     db = database.Database('data/tiles.db')
     try:
-        with db.transaction() as c:
-            database.set_has_solar(c, z, x, y, response)
+        if has_solar is not None:
+            with db.transaction() as c:
+                database.set_has_solar(c, z, x, y, has_solar)
+        else:
+            db.remove_score(z, x, y)
     except sqlite3.IntegrityError as e:
         print(e)
 

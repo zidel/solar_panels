@@ -77,9 +77,11 @@ function key_handler(event) {
     if (event.key === "j") {
         open_josm()
     } else if (event.key === "y") {
-        submit_result(true);
+        submit_result('true');
     } else if (event.key === "n") {
-        submit_result(false);
+        submit_result('false');
+    } else if (event.key === "m") {
+        submit_result('skip');
     }
 }
 
