@@ -48,17 +48,53 @@ def apply_rotation(tiles):
     return output
 
 
-def apply_flips(tiles):
+def apply_horizontal_flips(tiles):
     output = []
     for tile in tiles:
         for left_right in [0, 1]:
-            for up_down in [0, 1]:
-                copy = list(tile)
-                copy[3] = str(left_right)
-                copy[4] = str(up_down)
-                output.append(tuple(copy))
+            copy = list(tile)
+            copy[3] = str(left_right)
+            output.append(tuple(copy))
 
     return output
+
+
+def apply_vertical_flips(tiles):
+    output = []
+    for tile in tiles:
+        for up_down in [0, 1]:
+            copy = list(tile)
+            copy[4] = str(up_down)
+            output.append(tuple(copy))
+
+    return output
+
+
+def augment_tiles(solar, non_solar):
+    solar = apply_rotation(solar)
+    solar = apply_horizontal_flips(solar)
+    solar = apply_vertical_flips(solar)
+
+    non_solar_scaling_needed = len(solar) / len(non_solar)
+    print('Want to scale background by {:.3f}'.format(
+        non_solar_scaling_needed))
+
+    if non_solar_scaling_needed > 2:
+        print('Applying rotations to background tiles')
+        non_solar = apply_rotation(non_solar)
+        non_solar_scaling_needed /= 4
+
+    if non_solar_scaling_needed > 1:
+        print('Applying horizontal flips to background tiles')
+        non_solar = apply_horizontal_flips(non_solar)
+        non_solar_scaling_needed /= 2
+
+    if non_solar_scaling_needed > 1:
+        print('Applying vertical flips to background tiles')
+        non_solar = apply_vertical_flips(non_solar)
+        non_solar_scaling_needed /= 2
+
+    return solar, non_solar
 
 
 def main():
@@ -91,22 +127,15 @@ def main():
         len(tiles_with_solar),
         len(tiles_without_solar),
         ))
-
-    tiles_with_solar = apply_flips(tiles_with_solar)
-    tiles_with_solar = apply_rotation(tiles_with_solar)
-
-    if len(tiles_without_solar) < len(tiles_with_solar):
-        tiles_without_solar = apply_flips(tiles_without_solar)
-
-    if len(tiles_without_solar) < len(tiles_with_solar):
-        tiles_without_solar = apply_rotation(tiles_without_solar)
-
-    random.shuffle(tiles_with_solar)
-    random.shuffle(tiles_without_solar)
+    tiles_with_solar, tiles_without_solar = augment_tiles(
+            tiles_with_solar,
+            tiles_without_solar)
     print('After augmentation: {} solar / {} non solar'.format(
         len(tiles_with_solar),
         len(tiles_without_solar),
         ))
+    random.shuffle(tiles_with_solar)
+    random.shuffle(tiles_without_solar)
 
     images_per_category = min(len(tiles_with_solar), len(tiles_without_solar))
     tiles = tiles_with_solar[:images_per_category] \
