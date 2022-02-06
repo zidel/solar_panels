@@ -68,10 +68,7 @@ def main():
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
 
     parser.add_argument('--batch-size', default=128, type=int)
-    parser.add_argument('--step-count', default=200000, type=int)
-
-    parser.add_argument('--tensorboard', action='store_true')
-    parser.add_argument('--save-intermediate', action='store_true')
+    parser.add_argument('--step-count', default=500000, type=int)
     args = parser.parse_args()
 
     db = database.Database(args.database)
@@ -106,7 +103,7 @@ def main():
 
     random.shuffle(tiles_with_solar)
     random.shuffle(tiles_without_solar)
-    print('Have {} solar tiles and {} background'.format(
+    print('After augmentation: {} solar / {} non solar'.format(
         len(tiles_with_solar),
         len(tiles_without_solar),
         ))
@@ -146,17 +143,16 @@ def main():
 
     m = model.classify(args.load_model)
 
-    callbacks = []
-    if args.tensorboard:
-        callbacks.append(tf.keras.callbacks.TensorBoard(
-            log_dir='data/tensorboard/{}'.format(datetime.datetime.now()),
-            histogram_freq=1,
-            write_steps_per_second=True,
-            update_freq='batch'))
-    if args.save_intermediate:
-        callbacks.append(tf.keras.callbacks.ModelCheckpoint(
-            filepath='data/model.hdf5',
-            monitor='binary_io_u'))
+    callbacks = [
+            tf.keras.callbacks.TensorBoard(
+                log_dir='data/tensorboard/{}'.format(datetime.datetime.now()),
+                histogram_freq=1,
+                write_steps_per_second=True,
+                update_freq='batch'),
+            tf.keras.callbacks.ModelCheckpoint(
+                filepath='data/model.hdf5',
+                monitor='val_precision'),
+            ]
 
     m.fit(dataset,
           batch_size=args.batch_size,
