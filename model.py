@@ -62,10 +62,15 @@ def classify(weights_from=None):
 
     model = keras.models.Model(inputs=inputs, outputs=dense_3)
 
+    metrics = [
+            'accuracy',
+            keras.metrics.Recall(),
+            keras.metrics.Precision(),
+            ]
     model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=1e-4),
             loss=keras.losses.BinaryCrossentropy(),
-            metrics=['accuracy'])
+            metrics=metrics)
 
     if weights_from:
         model.load_weights(weights_from)
