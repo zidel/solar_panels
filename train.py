@@ -38,9 +38,9 @@ def load_image_data(tile_data):
 
 
 def apply_rotation(tiles):
-    output = list(tiles)
+    output = []
     for tile in tiles:
-        for rotations in range(1, 4):
+        for rotations in range(4):
             copy = list(tile)
             copy[2] = str(rotations)
             output.append(tuple(copy))
@@ -49,7 +49,7 @@ def apply_rotation(tiles):
 
 
 def apply_flips(tiles):
-    output = list(tiles)
+    output = []
     for tile in tiles:
         for left_right in [0, 1]:
             for up_down in [0, 1]:
