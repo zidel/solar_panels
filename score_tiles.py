@@ -80,7 +80,7 @@ def main():
         path = tile_to_path(tile, 'NiB')
         if pathlib.Path(path).exists():
             paths.append(path)
-            filtered_tiles.append((tile[0], x, y))
+            filtered_tiles.append(tile)
 
     skipped = len(tiles) - len(paths)
     if skipped:
