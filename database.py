@@ -54,14 +54,25 @@ class Database(object):
                       ''')
 
     def tiles(self):
+        tiles = []
         with self.transaction() as c:
             c.execute('''select z, x, y
                          from tiles
                          natural left join scores
+                         where score is null
+                      ''')
+            tiles += c.fetchall()
+
+            c.execute('''select z, x, y
+                         from tiles
+                         natural left join scores
                          natural left join with_solar
+                         where score is not null
                          order by has_solar asc, score desc
                       ''')
-            return c.fetchall()
+            tiles += c.fetchall()
+
+        return tiles
 
     def trainable(self):
         with self.transaction() as c:
