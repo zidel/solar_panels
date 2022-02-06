@@ -5,7 +5,6 @@ PYTHON_SRC := \
 	database.py \
 	download_tiles.py \
 	model.py \
-	review.py \
 	score_tiles.py \
 	train.py \
 	util.py \
