@@ -90,6 +90,11 @@ def main():
         else:
             tiles_without_solar.append(data)
 
+    print('Before augmentation: {} solar / {} non solar'.format(
+        len(tiles_with_solar),
+        len(tiles_without_solar),
+        ))
+
     tiles_with_solar = apply_flips(tiles_with_solar)
     tiles_with_solar = apply_rotation(tiles_with_solar)
 
