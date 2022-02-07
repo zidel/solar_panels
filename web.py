@@ -24,7 +24,7 @@ def send_script():
 @app.route('/api/review/next_tile')
 def get_next_tile_for_review():
     db = database.Database('data/tiles.db')
-    tiles = db.training_candidates(limit=1)
+    tiles = db.tiles_for_review(limit=1)
     if not tiles:
         return '', 204
 

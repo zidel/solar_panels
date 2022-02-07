@@ -85,7 +85,7 @@ class Database(object):
                       ''')
             return c.fetchall()
 
-    def training_candidates(self, limit):
+    def tiles_for_review(self, limit):
         with self.transaction() as c:
             c.execute('''select z, x, y, score
                          from scores
