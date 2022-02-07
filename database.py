@@ -61,19 +61,19 @@ class Database(object):
             c.execute('''select z, x, y
                          from tiles
                          natural left join scores
-                         where score is null
-                      ''')
-            tiles += c.fetchall()
-
-            c.execute('''select z, x, y
-                         from tiles
-                         natural left join scores
                          natural left join with_solar
                          where score is not null
                                and model_version != ?
                          order by has_solar asc, score desc
                       ''',
                       (current_model,))
+            tiles += c.fetchall()
+
+            c.execute('''select z, x, y
+                         from tiles
+                         natural left join scores
+                         where score is null
+                      ''')
             tiles += c.fetchall()
 
         return tiles
