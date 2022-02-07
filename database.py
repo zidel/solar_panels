@@ -49,11 +49,13 @@ class Database(object):
                              x integer not null,
                              y integer not null,
                              score real not null,
+                             model_version string not null,
+                             timestamp string not null,
                              primary key (z, x, y),
                              foreign key (z, x, y) references tiles)
                       ''')
 
-    def tiles(self):
+    def tiles_for_scoring(self, current_model):
         tiles = []
         with self.transaction() as c:
             c.execute('''select z, x, y
@@ -68,8 +70,10 @@ class Database(object):
                          natural left join scores
                          natural left join with_solar
                          where score is not null
+                               and model_version != ?
                          order by has_solar asc, score desc
-                      ''')
+                      ''',
+                      (current_model,))
             tiles += c.fetchall()
 
         return tiles
@@ -117,19 +121,21 @@ def add_tile(cursor, z, x, y):
                    (z, x, y))
 
 
-def write_score(cursor, z, x, y, score):
+def write_score(cursor, z, x, y, score, model_version, timestamp):
     assert(type(z) == int)
     assert(type(x) == int)
     assert(type(y) == int)
     assert(type(score) == float)
+    assert(type(model_version) == str)
+    assert(type(timestamp) == str)
 
     cursor.execute('''insert into scores
-                      (z, x, y, score)
-                      values (?, ?, ?, ?)
+                      (z, x, y, score, model_version, timestamp)
+                      values (?, ?, ?, ?, ?, ?)
                       on conflict(z, x, y) do
                       update set score=excluded.score
                    ''',
-                   (z, x, y, score))
+                   (z, x, y, score, model_version, timestamp))
 
 
 def set_has_solar(cursor, z, x, y, has_solar):

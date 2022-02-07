@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import hashlib
 import pathlib
 import sys
 import tensorflow
@@ -58,8 +59,31 @@ def load_nib_data(path):
     return load_image_from_path(path, 3)
 
 
-def process_prediction(cursor, tile, result):
-    database.write_score(cursor, tile[0], tile[1], tile[2], float(result))
+def process_prediction(cursor, tile, result, model_version):
+    now = datetime.datetime.now()
+    timestamp = now.isoformat()
+
+    database.write_score(
+            cursor,
+            tile[0],
+            tile[1],
+            tile[2],
+            float(result),
+            model_version,
+            timestamp)
+
+
+def hash_model(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        while True:
+            data = f.read(1024 * 1024)
+            if len(data) == 0:
+                break
+
+            h.update(data)
+
+    return h.hexdigest()
 
 
 def main():
@@ -72,8 +96,9 @@ def main():
     args = parser.parse_args()
 
     db = database.Database(args.database)
+    model_version = hash_model(args.model)
 
-    tiles = list(db.tiles())
+    tiles = list(db.tiles_for_scoring(model_version))
     filtered_tiles = []
     paths = []
     for tile in tiles:
@@ -101,7 +126,11 @@ def main():
             results = m.predict(batch, batch_size=args.batch_size)
             with db.transaction() as c:
                 for result in results:
-                    process_prediction(c, filtered_tiles[image_index], result)
+                    process_prediction(
+                            c,
+                            filtered_tiles[image_index],
+                            result,
+                            model_version)
                     image_index += 1
 
             progress.finished(len(results))
