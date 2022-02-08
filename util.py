@@ -1,3 +1,4 @@
+import hashlib
 import math
 
 
@@ -15,3 +16,16 @@ def tile2deg(x, y, z):
     lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
     lat_deg = math.degrees(lat_rad)
     return (lat_deg, lon_deg)
+
+
+def hash_file(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        while True:
+            data = f.read(1024 * 1024)
+            if len(data) == 0:
+                break
+
+            h.update(data)
+
+    return h.hexdigest()

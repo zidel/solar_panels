@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 import sqlite3
 
 import flask
@@ -45,6 +46,21 @@ def get_next_tile_for_review():
             }
 
 
+def _copy_tile(z, x, y, has_solar):
+    src = pathlib.Path('data/NiB/{}/{}/{}.jpeg'.format(z, x, y))
+    if not src.exists():
+        return
+
+    tile_hash = util.hash_file(src)
+    dir_name = 'solar' if has_solar else 'not_solar'
+    dst = pathlib.Path('data/unvalidated_labels/{}/{}.jpeg'.format(
+        dir_name,
+        tile_hash,
+        ))
+    print('{} -> {}'.format(src, dst))
+    shutil.copyfile(src, dst)
+
+
 @app.route('/api/review/response', methods=['POST'])
 def accept_tile_response():
     body = flask.request.json
@@ -71,6 +87,12 @@ def accept_tile_response():
             db.remove_score(z, x, y)
     except sqlite3.IntegrityError as e:
         print(e)
+
+    if has_solar is not None:
+        try:
+            _copy_tile(z, x, y, has_solar)
+        except Exception as e:
+            print(e)
 
     return {}
 

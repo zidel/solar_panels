@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import hashlib
 import pathlib
 import sys
 import tensorflow
@@ -8,6 +7,7 @@ import time
 
 import database
 import model
+import util
 
 
 class Progress(object):
@@ -73,19 +73,6 @@ def process_prediction(cursor, tile, result, model_version):
             timestamp)
 
 
-def hash_model(path):
-    h = hashlib.sha256()
-    with open(path, 'rb') as f:
-        while True:
-            data = f.read(1024 * 1024)
-            if len(data) == 0:
-                break
-
-            h.update(data)
-
-    return h.hexdigest()
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
@@ -96,7 +83,7 @@ def main():
     args = parser.parse_args()
 
     db = database.Database(args.database)
-    model_version = hash_model(args.model)
+    model_version = util.hash_file(args.model)
 
     tiles = list(db.tiles_for_scoring(model_version))
     filtered_tiles = []
