@@ -133,7 +133,9 @@ def write_score(cursor, z, x, y, score, model_version, timestamp):
                       (z, x, y, score, model_version, timestamp)
                       values (?, ?, ?, ?, ?, ?)
                       on conflict(z, x, y) do
-                      update set score=excluded.score
+                      update set score=excluded.score,
+                                 model_version=excluded.model_version,
+                                 timestamp=excluded.timestamp
                    ''',
                    (z, x, y, score, model_version, timestamp))
 
