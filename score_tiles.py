@@ -15,9 +15,11 @@ class Progress(object):
         self._start_time = time.time()
         self._total = total
         self.done = 0
+        self._score_dist = dict(((x, 0) for x in range(10)))
 
-    def finished(self, count):
+    def finished(self, count, score, prev_score):
         self.done += count
+        self._score_dist[int(score * 10)] += 1
 
         if self.done >= self._total:
             self.clear()
@@ -28,11 +30,20 @@ class Progress(object):
         seconds_left = (self._total - self.done) / rate
         eta = datetime.timedelta(seconds=seconds_left)
 
-        sys.stderr.write('\r{}/{} done, {:.2f} steps/s, {} remaining{}'.format(
+        score_dist = '/'.join([
+            '{:.0f}%'.format(100 * self._score_dist[i] / self.done)
+            for i
+            in self._score_dist])
+
+        prev_score_str = '{:.2f}'.format(prev_score) if prev_score else 'N/A'
+        sys.stderr.write('\r{}/{} done, {:.2f} steps/s, {} remaining, {} -> {:.2f}, {}{}'.format(
             self.done,
             self._total,
             rate,
             eta,
+            prev_score_str,
+            score,
+            score_dist,
             ' ' * 10))
 
     def clear(self):
@@ -113,14 +124,15 @@ def main():
             results = m.predict(batch, batch_size=args.batch_size)
             with db.transaction() as c:
                 for result in results:
+                    tile = filtered_tiles[image_index]
                     process_prediction(
                             c,
-                            filtered_tiles[image_index],
+                            tile,
                             result,
                             model_version)
                     image_index += 1
+                    progress.finished(1, float(result), tile[3])
 
-            progress.finished(len(results))
             if args.limit and image_index >= args.limit:
                 break
     finally:

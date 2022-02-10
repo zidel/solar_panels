@@ -58,7 +58,7 @@ class Database(object):
     def tiles_for_scoring(self, current_model):
         tiles = []
         with self.transaction() as c:
-            c.execute('''select z, x, y
+            c.execute('''select z, x, y, score
                          from tiles
                          natural left join scores
                          natural left join with_solar
@@ -69,7 +69,7 @@ class Database(object):
                       (current_model,))
             tiles += c.fetchall()
 
-            c.execute('''select z, x, y
+            c.execute('''select z, x, y, score
                          from tiles
                          natural left join scores
                          where score is null
