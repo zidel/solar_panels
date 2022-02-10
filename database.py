@@ -87,6 +87,16 @@ class Database(object):
 
     def tiles_for_review(self, limit):
         with self.transaction() as c:
+            c.execute('''select model_version
+                         from scores
+                         where timestamp in (
+                             select max(timestamp)
+                             from scores
+                             )
+                         limit 1
+                      ''')
+            model_version = c.fetchone()[0]
+
             c.execute('''select z, x, y, score
                          from scores
                          natural left join (
@@ -94,10 +104,11 @@ class Database(object):
                             from with_solar)
                          where t is null
                                and score is not null
+                               and model_version = ?
                          order by abs(score - 0.5) asc
                          limit ?
                       ''',
-                      (limit,))
+                      (model_version, limit))
             return c.fetchall()
 
     def remove_score(self, z, x, y):
