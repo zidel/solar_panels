@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import math
 import pathlib
 import sys
 import tensorflow
@@ -32,7 +33,7 @@ class Progress(object):
         eta = datetime.timedelta(seconds=seconds_left)
 
         score_dist = '/'.join([
-            '{:.0f}%'.format(100 * self._score_dist[i] / self.done)
+            '{:.1f}'.format(math.log(max(1, self._score_dist[i]), 10))
             for i
             in self._score_dist])
 
