@@ -19,7 +19,8 @@ class Progress(object):
 
     def finished(self, count, score, prev_score):
         self.done += count
-        self._score_dist[int(score * 10)] += 1
+        score_bin = max(min(int(score * 10), 9), 0)
+        self._score_dist[score_bin] += 1
 
         if self.done >= self._total:
             self.clear()
