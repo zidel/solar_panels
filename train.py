@@ -113,11 +113,11 @@ def main():
     for z, x, y, has_solar in db.trainable():
         nib_path = tile_to_paths(z, x, y)
         data = (str(nib_path),
-            'true' if has_solar else 'false',
-            '0',
-            '0',
-            '0',
-            )
+                'true' if has_solar else 'false',
+                '0',
+                '0',
+                '0',
+                )
         if has_solar:
             tiles_with_solar.append(data)
         else:
