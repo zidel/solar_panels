@@ -111,6 +111,14 @@ class Database(object):
                       (model_version, limit))
             return c.fetchall()
 
+    def tiles_with_solar(self):
+        with self.transaction() as c:
+            c.execute('''select z, x, y
+                         from with_solar
+                         where has_solar = True
+                      ''')
+            return c.fetchall()
+
     def remove_score(self, z, x, y):
         with self.transaction() as c:
             c.execute('''delete from scores

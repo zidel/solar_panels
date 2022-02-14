@@ -6,6 +6,7 @@ PYTHON_SRC := \
 	download_tiles.py \
 	model.py \
 	score_tiles.py \
+	to_gpx.py \
 	train.py \
 	util.py \
 	web.py \
