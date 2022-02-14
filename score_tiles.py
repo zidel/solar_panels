@@ -29,7 +29,7 @@ class Progress(object):
 
         since_start = time.time() - self._start_time
         rate = self.done / since_start
-        seconds_left = (self._total - self.done) / rate
+        seconds_left = int((self._total - self.done) / rate)
         eta = datetime.timedelta(seconds=seconds_left)
 
         score_dist = '/'.join([
