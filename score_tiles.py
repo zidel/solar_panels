@@ -38,7 +38,8 @@ class Progress(object):
             in self._score_dist])
 
         prev_score_str = '{:.2f}'.format(prev_score) if prev_score else 'N/A'
-        sys.stderr.write('\r{}/{} done, {:.2f} steps/s, {} remaining, {} -> {:.2f}, {}{}'.format(
+        fmt = '\r{}/{} done, {:.2f} steps/s, {} remaining, {} -> {:.2f}, {}{}'
+        sys.stderr.write(fmt.format(
             self.done,
             self._total,
             rate,
