@@ -12,9 +12,8 @@ import util
 
 
 class Progress(object):
-    def __init__(self, total):
+    def __init__(self):
         self._start_time = time.time()
-        self._total = total
         self.done = 0
         self._score_dist = dict(((x, 0) for x in range(10)))
 
@@ -23,14 +22,8 @@ class Progress(object):
         score_bin = max(min(int(score * 10), 9), 0)
         self._score_dist[score_bin] += 1
 
-        if self.done >= self._total:
-            self.clear()
-            return
-
         since_start = time.time() - self._start_time
         rate = self.done / since_start
-        seconds_left = int((self._total - self.done) / rate)
-        eta = datetime.timedelta(seconds=seconds_left)
 
         score_dist = '/'.join([
             '{}'.format(self._score_dist[i])
@@ -38,12 +31,10 @@ class Progress(object):
             in self._score_dist])
 
         prev_score_str = '{:.2f}'.format(prev_score) if prev_score else 'N/A'
-        fmt = '\r{}/{} done, {:.2f} steps/s, {} remaining, {} -> {:.2f}, {}{}'
+        fmt = '\r{} done, {:.2f} steps/s, {} -> {:.2f}, {}{}'
         sys.stderr.write(fmt.format(
             self.done,
-            self._total,
             rate,
-            eta,
             prev_score_str,
             score,
             score_dist,
@@ -87,7 +78,7 @@ def process_prediction(cursor, tile, result, model_version):
             timestamp)
 
 
-def score_tiles(db, m, model_version, batch_size, limit, tiles):
+def score_tiles(db, progress, m, model_version, batch_size, limit, tiles):
     filtered_tiles = []
     paths = []
     for tile in tiles:
@@ -106,27 +97,22 @@ def score_tiles(db, m, model_version, batch_size, limit, tiles):
             num_parallel_calls=tensorflow.data.AUTOTUNE)
     dataset = dataset.batch(batch_size)
 
-    progress = Progress(len(paths))
-    try:
-        image_index = 0
-        for batch in dataset:
-            results = m.predict(batch, batch_size=batch_size)
-            with db.transaction() as c:
-                for result in results:
-                    tile = filtered_tiles[image_index]
-                    process_prediction(
-                            c,
-                            tile,
-                            result,
-                            model_version)
-                    image_index += 1
-                    progress.finished(1, float(result), tile[3])
+    image_index = 0
+    for batch in dataset:
+        results = m.predict(batch, batch_size=batch_size)
+        with db.transaction() as c:
+            for result in results:
+                tile = filtered_tiles[image_index]
+                process_prediction(
+                        c,
+                        tile,
+                        result,
+                        model_version)
+                image_index += 1
+                progress.finished(1, float(result), tile[3])
 
-            if limit and image_index >= limit:
-                break
-    finally:
-        progress.clear()
-        print('Scored {} tiles'.format(progress.done))
+        if limit and image_index >= limit:
+            break
 
 
 def main():
@@ -141,9 +127,14 @@ def main():
     db = database.Database(args.database)
     model_version = util.hash_file(args.model)
     m = model.classify(args.model)
-    while True:
-        tiles = db.tiles_for_scoring(model_version, 10000)
-        score_tiles(db, m, model_version, args.batch_size, args.limit, tiles)
+    progress = Progress()
+    try:
+        while True:
+            tiles = db.tiles_for_scoring(model_version, 1000)
+            score_tiles(db, progress, m, model_version, args.batch_size, args.limit, tiles)
+    finally:
+        progress.clear()
+        print('Scored {} tiles'.format(progress.done))
 
 
 if __name__ == '__main__':
