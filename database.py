@@ -55,14 +55,15 @@ class Database(object):
                              foreign key (z, x, y) references tiles)
                       ''')
 
-    def tiles_for_scoring(self, current_model):
+    def tiles_for_scoring(self, current_model, limit):
         with self.transaction() as c:
             c.execute('''select z, x, y, score
                          from tiles
                          natural left join scores
                          where model_version != ?
+                         limit ?
                       ''',
-                      (current_model,))
+                      (current_model, limit))
             tiles = c.fetchall()
 
         return tiles

@@ -87,19 +87,7 @@ def process_prediction(cursor, tile, result, model_version):
             timestamp)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--database', default='data/tiles.db')
-    parser.add_argument('--model', default='data/model.hdf5')
-    parser.add_argument('--limit', type=int)
-
-    parser.add_argument('--batch-size', default=2, type=int)
-    args = parser.parse_args()
-
-    db = database.Database(args.database)
-    model_version = util.hash_file(args.model)
-
-    tiles = list(db.tiles_for_scoring(model_version))
+def score_tiles(db, m, model_version, batch_size, limit, tiles):
     filtered_tiles = []
     paths = []
     for tile in tiles:
@@ -116,15 +104,13 @@ def main():
     dataset = dataset.map(
             load_nib_data,
             num_parallel_calls=tensorflow.data.AUTOTUNE)
-    dataset = dataset.batch(args.batch_size)
-
-    m = model.classify(args.model)
+    dataset = dataset.batch(batch_size)
 
     progress = Progress(len(paths))
     try:
         image_index = 0
         for batch in dataset:
-            results = m.predict(batch, batch_size=args.batch_size)
+            results = m.predict(batch, batch_size=batch_size)
             with db.transaction() as c:
                 for result in results:
                     tile = filtered_tiles[image_index]
@@ -136,11 +122,28 @@ def main():
                     image_index += 1
                     progress.finished(1, float(result), tile[3])
 
-            if args.limit and image_index >= args.limit:
+            if limit and image_index >= limit:
                 break
     finally:
         progress.clear()
         print('Scored {} tiles'.format(progress.done))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--model', default='data/model.hdf5')
+    parser.add_argument('--limit', type=int)
+
+    parser.add_argument('--batch-size', default=2, type=int)
+    args = parser.parse_args()
+
+    db = database.Database(args.database)
+    model_version = util.hash_file(args.model)
+    m = model.classify(args.model)
+    while True:
+        tiles = db.tiles_for_scoring(model_version, 10000)
+        score_tiles(db, m, model_version, args.batch_size, args.limit, tiles)
 
 
 if __name__ == '__main__':
