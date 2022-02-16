@@ -33,7 +33,7 @@ class Progress(object):
         eta = datetime.timedelta(seconds=seconds_left)
 
         score_dist = '/'.join([
-            '{:.1f}'.format(math.log(max(1, self._score_dist[i]), 10))
+            '{}'.format(self._score_dist[i])
             for i
             in self._score_dist])
 
