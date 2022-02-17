@@ -56,17 +56,21 @@ class Database(object):
                       ''')
 
     def tiles_for_scoring(self, current_model, limit):
+        query_fmt = '''select {}
+                       from tiles
+                       natural left join scores
+                       where model_version != ?
+                       {}
+                    '''
         with self.transaction() as c:
-            c.execute('''select z, x, y, score
-                         from tiles
-                         natural left join scores
-                         where model_version != ?
-                         limit ?
-                      ''',
-                      (current_model, limit))
+            c.execute(query_fmt.format('count(*)', ''), [current_model])
+            count = c.fetchone()[0]
+
+            c.execute(query_fmt.format('z, x, y, score', 'limit ?'),
+                      [current_model, limit])
             tiles = c.fetchall()
 
-        return tiles
+        return (tiles, count)
 
     def trainable(self):
         with self.transaction() as c:

@@ -14,16 +14,26 @@ import util
 class Progress(object):
     def __init__(self):
         self._start_time = time.time()
+        self._total = 0
         self.done = 0
         self._score_dist = dict(((x, 0) for x in range(10)))
+
+    def remaining(self, count):
+        self._total = max(count, self._total)
 
     def finished(self, count, score, prev_score):
         self.done += count
         score_bin = max(min(int(score * 10), 9), 0)
         self._score_dist[score_bin] += 1
 
+        if self.done >= self._total:
+            self.clear()
+            return
+
         since_start = time.time() - self._start_time
         rate = self.done / since_start
+        seconds_left = int((self._total - self.done) / rate)
+        eta = datetime.timedelta(seconds=seconds_left)
 
         score_dist = '/'.join([
             '{}'.format(self._score_dist[i])
@@ -31,10 +41,12 @@ class Progress(object):
             in self._score_dist])
 
         prev_score_str = '{:.2f}'.format(prev_score) if prev_score else 'N/A'
-        fmt = '\r{} done, {:.2f} steps/s, {} -> {:.2f}, {}{}'
+        fmt = '\r{}/{} done, {:.2f} steps/s, {} remaining, {} -> {:.2f}, {}{}'
         sys.stderr.write(fmt.format(
             self.done,
+            self._total,
             rate,
+            eta,
             prev_score_str,
             score,
             score_dist,
@@ -130,7 +142,8 @@ def main():
     progress = Progress()
     try:
         while True:
-            tiles = db.tiles_for_scoring(model_version, 1000)
+            tiles, count = db.tiles_for_scoring(model_version, 1000)
+            progress.remaining(count)
             score_tiles(db, progress, m, model_version, args.batch_size, args.limit, tiles)
     finally:
         progress.clear()
