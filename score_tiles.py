@@ -99,10 +99,6 @@ def score_tiles(db, progress, m, model_version, batch_size, limit, tiles):
             paths.append(path)
             filtered_tiles.append(tile)
 
-    skipped = len(tiles) - len(paths)
-    if skipped:
-        print('Skipping {} tiles without image data'.format(skipped))
-
     dataset = tensorflow.data.Dataset.from_tensor_slices(paths)
     dataset = dataset.map(
             load_nib_data,
