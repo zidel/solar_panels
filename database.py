@@ -59,7 +59,7 @@ class Database(object):
         query_fmt = '''select {}
                        from tiles
                        natural left join scores
-                       where model_version != ?
+                       where model_version is null or model_version != ?
                        {}
                     '''
         with self.transaction() as c:
