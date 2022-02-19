@@ -19,7 +19,7 @@ class Progress(object):
         self._score_dist = dict(((x, 0) for x in range(10)))
 
     def remaining(self, count):
-        self._total = max(count, self._total)
+        self._total = max(count + self.done, self._total)
 
     def finished(self, count, score, prev_score):
         self.done += count
