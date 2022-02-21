@@ -68,7 +68,7 @@ def tile_to_path(tile, dataset):
 def load_image_from_path(input_path, channels):
     input_data = tensorflow.io.read_file(input_path)
     input_data = tensorflow.io.decode_jpeg(input_data, channels=channels)
-    input_data = tensorflow.cast(input_data, tensorflow.float32) / 255.0
+    input_data = tensorflow.cast(input_data, tensorflow.float32)# / 255.0
     return input_data
 
 
@@ -91,6 +91,9 @@ def process_prediction(cursor, tile, result, model_version):
 
 
 def score_tiles(db, progress, m, model_version, batch_size, limit, tiles):
+    if not tiles:
+        return
+
     filtered_tiles = []
     paths = []
     for tile in tiles:
