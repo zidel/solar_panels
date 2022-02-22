@@ -28,15 +28,15 @@ def pool(input_layer):
 
 def classify(weights_from=None):
     inputs = keras.layers.Input((256, 256, 3))
-    processed = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
-    mnv2 = keras.applications.mobilenet_v2.MobileNetV2(
+    processed = tf.keras.applications.vgg19.preprocess_input(inputs)
+    vgg19 = keras.applications.vgg19.VGG19(
             include_top=False,
             input_tensor=processed,
             input_shape=(256, 256, 3),
             )
-    mnv2.trainable = False
+    vgg19.trainable = False
 
-    flatten = keras.layers.Flatten()(mnv2.output)
+    flatten = keras.layers.Flatten()(vgg19.output)
     dense_1 = keras.layers.Dense(1024, activation='relu')(flatten)
     dense_2 = keras.layers.Dense(1, activation='sigmoid')(dense_1)
 
