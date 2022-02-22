@@ -173,17 +173,7 @@ def main():
                                           num_parallel_calls=tf.data.AUTOTUNE)
     validation_data = validation_data.batch(args.batch_size)
 
-    if args.model == 'VGG19':
-        m = model.vgg19(args.load_model, args.learning_rate)
-    elif args.model == 'VGG19_reduced':
-        m = model.vgg19_reduced(args.load_model, args.learning_rate)
-    elif args.model == 'VGG16':
-        m = model.vgg16(args.load_model, args.learning_rate)
-    elif args.model == 'MobileNetV2':
-        m = model.mobile_v2(args.load_model, args.learning_rate)
-    else:
-        print('Unknown model type')
-        return 1
+    m = model.get(args.model, args.load_model, args.learning_rate)
 
     if args.tensorboard is None:
         tensorboard_name = '{}'.format(datetime.datetime.now())

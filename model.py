@@ -180,3 +180,18 @@ def mobile_v2(weights_from, learning_rate):
         model.load_weights(weights_from)
 
     return model
+
+
+def get(model_type, weights_from=None, learning_rate=1e-4):
+    if model_type == 'custom':
+        return custom(weights_from, learning_rate)
+    elif model_type == 'VGG19':
+        return vgg19(weights_from, learning_rate)
+    elif model_type == 'VGG19_reduced':
+        return vgg19_reduced(weights_from, learning_rate)
+    elif model_type == 'VGG16':
+        return vgg16(weights_from, learning_rate)
+    elif model_type == 'MobileNetV2':
+        return mobile_v2(weights_from, learning_rate)
+    else:
+        raise ValueError

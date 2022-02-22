@@ -129,15 +129,18 @@ def score_tiles(db, progress, m, model_version, batch_size, limit, tiles):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
-    parser.add_argument('--model', default='data/model.hdf5')
+    parser.add_argument('--model', default='vgg19')
+    parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--limit', type=int)
 
     parser.add_argument('--batch-size', default=2, type=int)
     args = parser.parse_args()
 
     db = database.Database(args.database)
-    model_version = util.hash_file(args.model)
-    m = model.classify(args.model)
+    model_version = util.hash_file(args.load_model)
+
+    m = model.get(args.model, args.load_model)
+
     progress = Progress()
     try:
         while True:

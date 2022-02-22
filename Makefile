@@ -56,12 +56,12 @@ data/mobile_v2.hdf5 : train.py model.py Makefile
 	python3 train.py --model MobileNetV2 --save-to data/mobile_v2.hdf5 --tensorboard=mobilev2_bg2_lr-5 --learning-rate=1e-5 --step-count=1000000
 
 compare_models : data/vgg19_lr4.hdf5 data/vgg19_lr5.hdf5 data/vgg19_lr6.hdf5 data/vgg19_reduced.hdf5 data/vgg16.hdf5 data/mobile_v2.hdf5
-	python3 confusion_matrix.py --model data/vgg19_lr4.hdf5
-	python3 confusion_matrix.py --model data/vgg19_lr5.hdf5
-	python3 confusion_matrix.py --model data/vgg19_lr6.hdf5
-	python3 confusion_matrix.py --model data/vgg19_reduced.hdf5
-	python3 confusion_matrix.py --model data/vgg16.hdf5
-	python3 confusion_matrix.py --model data/mobile_v2.hdf5
+	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr4.hdf5
+	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr5.hdf5
+	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr6.hdf5
+	python3 confusion_matrix.py --model VGG19_reduced --load-model data/vgg19_reduced.hdf5
+	python3 confusion_matrix.py --model VGG16 --load-model data/vgg16.hdf5
+	python3 confusion_matrix.py --model MobileNetV2 --load-model data/mobile_v2.hdf5
 
 
 clean :

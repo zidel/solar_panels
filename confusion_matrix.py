@@ -24,11 +24,12 @@ def load_nib_data(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
-    parser.add_argument('--model', default='data/model.hdf5')
+    parser.add_argument('--model', default='vgg19')
+    parser.add_argument('--load-model', default='data/model.hdf5')
     args = parser.parse_args()
 
     db = database.Database(args.database)
-    model_version = util.hash_file(args.model)
+    model_version = util.hash_file(args.load_model)
 
     with db.transaction() as c:
         c.execute('''select z, x, y, score
@@ -45,7 +46,7 @@ def main():
         score_tiles.score_tiles(
                 db,
                 progress,
-                model.classify(args.model),
+                model.get(args.model, args.load_model),
                 model_version,
                 2,
                 None,
