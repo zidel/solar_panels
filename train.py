@@ -75,7 +75,7 @@ def augment_tiles(solar, non_solar):
     solar = apply_horizontal_flips(solar)
     solar = apply_vertical_flips(solar)
 
-    non_solar_scaling_needed = len(solar) / len(non_solar)
+    non_solar_scaling_needed = 2 * len(solar) / len(non_solar)
     print('Want to scale background by {:.3f}'.format(
         non_solar_scaling_needed))
 
@@ -100,8 +100,10 @@ def augment_tiles(solar, non_solar):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--model', type=str, default='vgg19')
     parser.add_argument('--load-model', type=str)
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
+    parser.add_argument('--tensorboard', type=str, default=None)
 
     parser.add_argument('--batch-size', default=128, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
@@ -170,12 +172,28 @@ def main():
                                           num_parallel_calls=tf.data.AUTOTUNE)
     validation_data = validation_data.batch(args.batch_size)
 
-    m = model.classify(args.load_model)
+    if args.model == 'VGG19':
+        m = model.vgg19(args.load_model)
+    elif args.model == 'VGG19_reduced':
+        m = model.vgg19_reduced(args.load_model)
+    elif args.model == 'VGG16':
+        m = model.vgg16(args.load_model)
+    elif args.model == 'MobileNetV2':
+        m = model.mobile_v2(args.load_model)
+    else:
+        print('Unknown model type')
+        return 1
+
     m.summary()
+
+    if args.tensorboard is None:
+        tensorboard_name = '{}'.format(datetime.datetime.now())
+    else:
+        tensorboard_name = args.tensorboard
 
     callbacks = [
             tf.keras.callbacks.TensorBoard(
-                log_dir='data/tensorboard/{}'.format(datetime.datetime.now()),
+                log_dir='data/tensorboard/{}'.format(tensorboard_name),
                 histogram_freq=1,
                 write_steps_per_second=True,
                 update_freq='batch'),

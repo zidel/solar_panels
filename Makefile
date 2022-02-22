@@ -37,6 +37,18 @@ web :
 	python3 web.py
 
 
+compare_models :
+	python3 train.py --model VGG19 --save-to data/vgg19.hdf5 --tensorboard=vgg19_bg2_lr-6
+	python3 train.py --model VGG19_reduced --save-to data/vgg19_reduced.hdf5 --tensorboard=vgg19_reduced_bg2_lr-6
+	python3 train.py --model VGG16 --save-to data/vgg16.hdf5 --tensorboard=vgg16_bg2_lr-6
+	python3 train.py --model MobileNetV2 --save-to data/mobile_v2.hdf5 --tensorboard=mobilev2_bg2_lr-6
+	echo
+	python3 confusion_matrix.py --model data/vgg19.hdf5
+	python3 confusion_matrix.py --model data/vgg19_reduced.hdf5
+	python3 confusion_matrix.py --model data/vgg16.hdf5
+	python3 confusion_matrix.py --model data/mobile_v2.hdf5
+
+
 clean :
 	$(RM) .flake8.marker
 	$(RM) data/tiles.db

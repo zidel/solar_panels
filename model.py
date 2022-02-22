@@ -26,7 +26,7 @@ def pool(input_layer):
     return keras.layers.MaxPooling2D()(input_layer)
 
 
-def classify(weights_from=None):
+def vgg19_base(width, weights_from=None):
     inputs = keras.layers.Input((256, 256, 3))
     processed = tf.keras.applications.vgg19.preprocess_input(inputs)
     vgg19 = keras.applications.vgg19.VGG19(
@@ -37,10 +37,83 @@ def classify(weights_from=None):
     vgg19.trainable = False
 
     flatten = keras.layers.Flatten()(vgg19.output)
-    dense_1 = keras.layers.Dense(1024, activation='relu')(flatten)
-    dense_2 = keras.layers.Dense(1, activation='sigmoid')(dense_1)
+    dense_1 = keras.layers.Dense(width, activation='relu')(flatten)
+    dense_2 = keras.layers.Dense(width, activation='relu')(dense_1)
+    dense_3 = keras.layers.Dense(1, activation='sigmoid')(dense_2)
 
-    model = keras.models.Model(inputs=inputs, outputs=dense_2)
+    model = keras.models.Model(inputs=inputs, outputs=dense_3)
+
+    metrics = [
+            keras.metrics.Recall(),
+            keras.metrics.Precision(),
+            ]
+    model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=1e-6),
+            loss=keras.losses.BinaryCrossentropy(),
+            metrics=metrics)
+
+    if weights_from:
+        model.load_weights(weights_from)
+
+    return model
+
+
+def vgg19(weights_from=None):
+    return vgg19_base(1024, weights_from)
+
+
+def vgg19_reduced(weights_from=None):
+    return vgg19_base(512, weights_from)
+
+
+def vgg16(weights_from=None):
+    inputs = keras.layers.Input((256, 256, 3))
+    processed = tf.keras.applications.vgg16.preprocess_input(inputs)
+    vgg16 = keras.applications.vgg16.VGG16(
+            include_top=False,
+            input_tensor=processed,
+            input_shape=(256, 256, 3),
+            )
+    vgg16.trainable = False
+
+    flatten = keras.layers.Flatten()(vgg16.output)
+    dense_1 = keras.layers.Dense(1024, activation='relu')(flatten)
+    dense_2 = keras.layers.Dense(1024, activation='relu')(dense_1)
+    dense_3 = keras.layers.Dense(1, activation='sigmoid')(dense_2)
+
+    model = keras.models.Model(inputs=inputs, outputs=dense_3)
+
+    metrics = [
+            keras.metrics.Recall(),
+            keras.metrics.Precision(),
+            ]
+    model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=1e-6),
+            loss=keras.losses.BinaryCrossentropy(),
+            metrics=metrics)
+
+    if weights_from:
+        model.load_weights(weights_from)
+
+    return model
+
+
+def mobile_v2(weights_from=None):
+    inputs = keras.layers.Input((256, 256, 3))
+    processed = tf.keras.applications.mobilenetv2.preprocess_input(inputs)
+    mnv2 = keras.applications.mobilenetv2.MobileNetV2(
+            include_top=False,
+            input_tensor=processed,
+            input_shape=(256, 256, 3),
+            )
+    mnv2.trainable = False
+
+    flatten = keras.layers.Flatten()(mnv2.output)
+    dense_1 = keras.layers.Dense(width, activation='relu')(flatten)
+    dense_2 = keras.layers.Dense(width, activation='relu')(dense_1)
+    dense_3 = keras.layers.Dense(1, activation='sigmoid')(dense_2)
+
+    model = keras.models.Model(inputs=inputs, outputs=dense_3)
 
     metrics = [
             keras.metrics.Recall(),
