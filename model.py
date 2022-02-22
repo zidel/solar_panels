@@ -26,7 +26,7 @@ def pool(input_layer):
     return keras.layers.MaxPooling2D()(input_layer)
 
 
-def vgg19_base(width, weights_from=None):
+def vgg19_base(width, weights_from, learning_rate):
     inputs = keras.layers.Input((256, 256, 3))
     processed = tf.keras.applications.vgg19.preprocess_input(inputs)
     vgg19 = keras.applications.vgg19.VGG19(
@@ -48,7 +48,7 @@ def vgg19_base(width, weights_from=None):
             keras.metrics.Precision(),
             ]
     model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=1e-6),
+            optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
             loss=keras.losses.BinaryCrossentropy(),
             metrics=metrics)
 
@@ -58,15 +58,15 @@ def vgg19_base(width, weights_from=None):
     return model
 
 
-def vgg19(weights_from=None):
-    return vgg19_base(1024, weights_from)
+def vgg19(weights_from, learning_rate):
+    return vgg19_base(1024, weights_from, learning_rate)
 
 
-def vgg19_reduced(weights_from=None):
-    return vgg19_base(512, weights_from)
+def vgg19_reduced(weights_from, learning_rate):
+    return vgg19_base(512, weights_from, learning_rate)
 
 
-def vgg16(weights_from=None):
+def vgg16(weights_from, learning_rate):
     inputs = keras.layers.Input((256, 256, 3))
     processed = tf.keras.applications.vgg16.preprocess_input(inputs)
     vgg16 = keras.applications.vgg16.VGG16(
@@ -88,7 +88,7 @@ def vgg16(weights_from=None):
             keras.metrics.Precision(),
             ]
     model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=1e-6),
+            optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
             loss=keras.losses.BinaryCrossentropy(),
             metrics=metrics)
 
@@ -98,7 +98,7 @@ def vgg16(weights_from=None):
     return model
 
 
-def mobile_v2(weights_from=None):
+def mobile_v2(weights_from, learning_rate):
     inputs = keras.layers.Input((256, 256, 3))
     processed = tf.keras.applications.mobilenetv2.preprocess_input(inputs)
     mnv2 = keras.applications.mobilenetv2.MobileNetV2(
@@ -120,7 +120,7 @@ def mobile_v2(weights_from=None):
             keras.metrics.Precision(),
             ]
     model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=1e-6),
+            optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
             loss=keras.losses.BinaryCrossentropy(),
             metrics=metrics)
 

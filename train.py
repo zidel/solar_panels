@@ -107,6 +107,7 @@ def main():
 
     parser.add_argument('--batch-size', default=128, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
+    parser.add_argument('--learning-rate', default=1e-4, type=float)
     args = parser.parse_args()
 
     db = database.Database(args.database)
@@ -173,13 +174,13 @@ def main():
     validation_data = validation_data.batch(args.batch_size)
 
     if args.model == 'VGG19':
-        m = model.vgg19(args.load_model)
+        m = model.vgg19(args.load_model, args.learning_rate)
     elif args.model == 'VGG19_reduced':
-        m = model.vgg19_reduced(args.load_model)
+        m = model.vgg19_reduced(args.load_model, args.learning_rate)
     elif args.model == 'VGG16':
-        m = model.vgg16(args.load_model)
+        m = model.vgg16(args.load_model, args.learning_rate)
     elif args.model == 'MobileNetV2':
-        m = model.mobile_v2(args.load_model)
+        m = model.mobile_v2(args.load_model, args.learning_rate)
     else:
         print('Unknown model type')
         return 1
