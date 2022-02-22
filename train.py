@@ -185,8 +185,6 @@ def main():
         print('Unknown model type')
         return 1
 
-    m.summary()
-
     if args.tensorboard is None:
         tensorboard_name = '{}'.format(datetime.datetime.now())
     else:
