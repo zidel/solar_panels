@@ -70,12 +70,12 @@ def apply_vertical_flips(tiles):
     return output
 
 
-def augment_tiles(solar, non_solar):
+def augment_tiles(solar, non_solar, background_scale):
     solar = apply_rotation(solar)
     solar = apply_horizontal_flips(solar)
     solar = apply_vertical_flips(solar)
 
-    non_solar_scaling_needed = 2 * len(solar) / len(non_solar)
+    non_solar_scaling_needed = background_scale * len(solar) / len(non_solar)
     print('Want to scale background by {:.3f}'.format(
         non_solar_scaling_needed))
 
@@ -108,6 +108,7 @@ def main():
     parser.add_argument('--batch-size', default=128, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
     parser.add_argument('--learning-rate', default=1e-4, type=float)
+    parser.add_argument('--background-scale', default=2.0, type=float)
     args = parser.parse_args()
 
     db = database.Database(args.database)
@@ -132,7 +133,8 @@ def main():
         ))
     tiles_with_solar, tiles_without_solar = augment_tiles(
             tiles_with_solar,
-            tiles_without_solar)
+            tiles_without_solar,
+            args.background_scale)
     print('After augmentation: {} solar / {} non solar'.format(
         len(tiles_with_solar),
         len(tiles_without_solar),
@@ -142,7 +144,7 @@ def main():
 
     images_per_category = min(len(tiles_with_solar), len(tiles_without_solar))
     tiles = tiles_with_solar[:images_per_category] \
-        + tiles_without_solar[:images_per_category * 2]
+        + tiles_without_solar[:int(images_per_category * args.background_scale)]
     training_set_size = int(len(tiles) * 0.9)
 
     random.shuffle(tiles)
