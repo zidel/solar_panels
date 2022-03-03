@@ -43,7 +43,7 @@ data/vgg19_lr3.hdf5 : train.py model.py Makefile
 data/vgg19_lr4_bg1.hdf5 : train.py model.py Makefile
 	python3 train.py --model VGG19 --save-to data/vgg19_lr4_bg1.hdf5 \
 	                 --tensorboard=vgg19_bg1_lr-4 --learning-rate=1e-4 \
-	                 --step-count=500000 --background-scale=2
+	                 --step-count=500000 --background-scale=1
 
 data/vgg19_lr4_bg2.hdf5 : train.py model.py Makefile
 	python3 train.py --model VGG19 --save-to data/vgg19_lr4_bg2.hdf5 \
