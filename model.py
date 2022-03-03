@@ -120,7 +120,7 @@ def get(model_type, weights_from=None, learning_rate=1e-4):
             'VGG19_reduced': (vgg19, 512),
             'VGG16': (vgg16, 1024),
             'MobileNetV2': (mobile_v2, 1024),
-            'ResNetV2': (resnet_152_v2, 1024),
+            'ResNetV2': (resnet_152_v2, 512),
             'InceptionResNetV2': (inception_resnet_v2, 1024),
             }[model_type]
     feature_extraction = factory(inputs, input_shape)
