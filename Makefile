@@ -76,6 +76,16 @@ data/vgg19_lr4_bg3.hdf5 : train.py model.py Makefile
 	                 --background-scale=3 \
 	                 --batch-size=256
 
+data/vgg19_lr4_bg8.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
+	python3 train.py --model VGG19 \
+	                 --save-to data/vgg19_lr4_bg8.hdf5 \
+	                 --tensorboard=vgg19_bg8_lr-4 \
+	                 --learning-rate=1e-4 \
+	                 --step-count=500000 \
+	                 --background-scale=8 \
+	                 --batch-size=256
+
 data/vgg19_lr5.hdf5 : train.py model.py Makefile
 	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19 \
@@ -140,6 +150,7 @@ data/inception_resnet_v2.hdf5 : train.py model.py Makefile
 	                 --batch-size=2048
 
 compare_models : data/vgg19_lr4_bg3.hdf5 \
+	             data/vgg19_lr4_bg8.hdf5 \
 	             data/resnet_v2.hdf5 \
 	             data/inception_resnet_v2.hdf5 \
 	             data/vgg19_lr3.hdf5 \
@@ -154,6 +165,7 @@ compare_models : data/vgg19_lr4_bg3.hdf5 \
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr4_bg1.hdf5
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr4_bg2.hdf5
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr4_bg3.hdf5
+	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr4_bg8.hdf5
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr5.hdf5
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr6.hdf5
 	python3 confusion_matrix.py --model VGG19_reduced --load-model data/vgg19_reduced.hdf5
