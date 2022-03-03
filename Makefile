@@ -38,39 +38,49 @@ web :
 
 
 data/vgg19_lr3.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19 --save-to data/vgg19_lr3.hdf5 --tensorboard=vgg19_bg2_lr-3 --learning-rate=1e-3 --step-count=250000
 
 data/vgg19_lr4_bg1.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19 --save-to data/vgg19_lr4_bg1.hdf5 \
 	                 --tensorboard=vgg19_bg1_lr-4 --learning-rate=1e-4 \
 	                 --step-count=500000 --background-scale=1
 
 data/vgg19_lr4_bg2.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19 --save-to data/vgg19_lr4_bg2.hdf5 \
 	                 --tensorboard=vgg19_bg2_lr-4 --learning-rate=1e-4 \
 	                 --step-count=500000 --background-scale=2
 
 data/vgg19_lr4_bg3.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19 --save-to data/vgg19_lr4_bg3.hdf5 \
 	                 --tensorboard=vgg19_bg3_lr-4 --learning-rate=1e-4 \
 	                 --step-count=500000 --background-scale=3
 
 data/vgg19_lr5.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19 --save-to data/vgg19_lr5.hdf5 --tensorboard=vgg19_bg2_lr-5 --learning-rate=1e-5 --step-count=1000000
 
 data/vgg19_lr6.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19 --save-to data/vgg19_lr6.hdf5 --tensorboard=vgg19_bg2_lr-6 --learning-rate=1e-6 --step-count=1000000
 
 data/vgg19_reduced.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG19_reduced --save-to data/vgg19_reduced.hdf5 --tensorboard=vgg19_reduced_bg2_lr-5 --learning-rate=1e-5 --step-count=1000000
 
 data/vgg16.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model VGG16 --save-to data/vgg16.hdf5 --tensorboard=vgg16_bg2_lr-5 --learning-rate=1e-5 --step-count=1000000
 
 data/mobile_v2.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model MobileNetV2 --save-to data/mobile_v2.hdf5 --tensorboard=mobilev2_bg2_lr-5 --learning-rate=1e-5 --step-count=1000000
 
 data/resnet_v2.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model ResNetV2 \
 	                 --save-to data/resnet_v2.hdf5 \
 	                 --tensorboard=resnetv2_bg2_lr-5 \
@@ -79,6 +89,7 @@ data/resnet_v2.hdf5 : train.py model.py Makefile
 	                 --batch-size=1024
 
 data/inception_resnet_v2.hdf5 : train.py model.py Makefile
+	TF_CPP_MIN_LOG_LEVEL=3 \
 	python3 train.py --model InceptionResNetV2 \
 	                 --save-to data/inception_resnet_v2.hdf5 \
 	                 --tensorboard=inceptionv2_bg2_lr-5 \
