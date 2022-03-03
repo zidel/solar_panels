@@ -139,14 +139,17 @@ data/inception_resnet_v2.hdf5 : train.py model.py Makefile
 	                 --step-count=1000000 \
 	                 --batch-size=2048
 
-compare_models : data/vgg19_lr3.hdf5 \
+compare_models : data/vgg19_lr4_bg3.hdf5 \
+	             data/resnet_v2.hdf5 \
+	             data/inception_resnet_v2.hdf5 \
+	             data/vgg19_lr3.hdf5 \
 	             data/vgg19_lr4_bg1.hdf5 \
 	             data/vgg19_lr4_bg2.hdf5 \
-	             data/vgg19_lr4_bg3.hdf5 \
 	             data/vgg19_lr5.hdf5 \
-	             data/vgg19_lr6.hdf5 data/vgg19_reduced.hdf5 data/vgg16.hdf5 \
-	             data/mobile_v2.hdf5 data/resnet_v2.hdf5 \
-	             data/inception_resnet_v2.hdf5
+	             data/vgg19_lr6.hdf5 \
+	             data/vgg19_reduced.hdf5 \
+	             data/vgg16.hdf5 \
+	             data/mobile_v2.hdf5
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr3.hdf5
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr4_bg1.hdf5
 	python3 confusion_matrix.py --model VGG19 --load-model data/vgg19_lr4_bg2.hdf5
