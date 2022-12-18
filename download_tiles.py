@@ -92,6 +92,10 @@ def main():
     parser.add_argument('--zoom', action='append', type=int)
     args = parser.parse_args()
 
+    if not args.zoom:
+        print('Must specify at least one zoom level')
+        return 1
+
     db_path = pathlib.Path(args.database)
     os.makedirs(db_path.parent, exist_ok=True)
     db = database.Database(args.database)
@@ -143,4 +147,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
