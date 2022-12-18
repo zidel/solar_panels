@@ -6,6 +6,7 @@ import sys
 import tensorflow
 import time
 
+import download_tiles
 import database
 import model
 import util
@@ -52,17 +53,14 @@ class Progress(object):
             score_dist,
             ' ' * 10))
 
+    def log(self, msg, *args):
+        self.clear()
+        print(msg.format(*args))
+
     def clear(self):
         sys.stderr.write(' ' * 60)
         sys.stderr.write('\r')
         sys.stderr.flush()
-
-
-def tile_to_path(tile, dataset):
-    z = tile[0]
-    x = tile[1]
-    y = tile[2]
-    return 'data/{}/{}/{}/{}.jpeg'.format(dataset, z, x, y)
 
 
 def load_image_from_path(input_path, channels):
@@ -90,17 +88,20 @@ def process_prediction(cursor, tile, result, model_version):
             timestamp)
 
 
-def score_tiles(db, progress, m, model_version, batch_size, limit, tiles):
+def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit, tiles):
     if not tiles:
         return
 
-    filtered_tiles = []
     paths = []
     for tile in tiles:
-        path = tile_to_path(tile, 'NiB')
-        if pathlib.Path(path).exists():
-            paths.append(path)
-            filtered_tiles.append(tile)
+        z = tile[0]
+        x = tile[1]
+        y = tile[2]
+        path = 'data/NiB/{}/{}/{}.jpeg'.format(z, x, y)
+        paths.append(path)
+        if not pathlib.Path(path).exists():
+            progress.log('Downloading {}/{}/{}'.format(z, x, y))
+            download_tiles.download_single_tile(nib_api_key, z, x, y)
 
     dataset = tensorflow.data.Dataset.from_tensor_slices(paths)
     dataset = dataset.map(
@@ -113,7 +114,7 @@ def score_tiles(db, progress, m, model_version, batch_size, limit, tiles):
         results = m.predict(batch, batch_size=batch_size)
         with db.transaction() as c:
             for result in results:
-                tile = filtered_tiles[image_index]
+                tile = tiles[image_index]
                 process_prediction(
                         c,
                         tile,
@@ -129,6 +130,7 @@ def score_tiles(db, progress, m, model_version, batch_size, limit, tiles):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--model', default='vgg19')
     parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--limit', type=int)
@@ -138,6 +140,7 @@ def main():
 
     db = database.Database(args.database)
     model_version = util.hash_file(args.load_model)
+    nib_api_key = util.load_key(args.NiB_key)
 
     m = model.get(args.model, args.load_model)
 
@@ -146,7 +149,7 @@ def main():
         while True:
             tiles, count = db.tiles_for_scoring(model_version, 1000)
             progress.remaining(count)
-            score_tiles(db, progress, m, model_version, args.batch_size, args.limit, tiles)
+            score_tiles(db, nib_api_key, progress, m, model_version, args.batch_size, args.limit, tiles)
     finally:
         progress.clear()
         print('Scored {} tiles'.format(progress.done))

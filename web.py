@@ -101,7 +101,7 @@ def accept_tile_response():
 def get_nib_tile(z, x, y):
     path = pathlib.Path('data/NiB/{}/{}/{}.jpeg'.format(z, x, y))
     if not path.exists():
-        nib_api_key = download_tiles.load_key('secret/NiB_key.json')
+        nib_api_key = util.load_key('secret/NiB_key.json')
         download_tiles.download_single_tile(nib_api_key, z, x, y)
 
     return flask.send_from_directory(

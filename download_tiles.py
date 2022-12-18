@@ -19,11 +19,6 @@ def nib_url(z, x, y, key):
     return fmt.format(z, x, y, key)
 
 
-def load_key(path):
-    j = json.load(open(path, 'rb'))
-    return j['key']
-
-
 def download_tile(url: str, dest: pathlib.Path):
     if not dest.parent.exists():
         os.makedirs(dest.parent)
@@ -100,7 +95,7 @@ def main():
     os.makedirs(db_path.parent, exist_ok=True)
     db = database.Database(args.database)
 
-    nib_api_key = load_key(args.NiB_key)
+    nib_api_key = util.load_key(args.NiB_key)
     pop_data = read_population_data(args.population, args.min_population)
 
     tiles_total = 0

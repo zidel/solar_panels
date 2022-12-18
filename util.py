@@ -1,4 +1,5 @@
 import hashlib
+import json
 import math
 
 
@@ -29,3 +30,8 @@ def hash_file(path):
             h.update(data)
 
     return h.hexdigest()
+
+
+def load_key(path):
+    j = json.load(open(path, 'rb'))
+    return j['key']
