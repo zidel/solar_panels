@@ -37,10 +37,16 @@ def download_tile(url: str, dest: pathlib.Path):
 def download_single_tile(nib_api_key, z, x, y):
     nib_dest = pathlib.Path('/mnt/server-NiB/{}/{}/{}.jpeg'.format(z, x, y))
     if not nib_dest.exists():
+        start = time.time()
+
         download_tile(
                 nib_url(z, x, y, nib_api_key),
                 nib_dest,
                 )
+
+        duration = time.time() - start
+        if duration < 1.0:
+            time.sleep(1.0 - duration)
 
 
 def read_population_data(path, min_population):
