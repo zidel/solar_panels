@@ -98,21 +98,24 @@ class Database(object):
                              )
                          limit 1
                       ''')
-            model_version = c.fetchone()[0]
+            model_version = c.fetchone()
+            if model_version is not None:
+                c.execute('''select z, x, y, score
+                             from scores
+                             natural left join (
+                                select 1 as t, z, x, y
+                                from with_solar)
+                             where t is null
+                                   and score is not null
+                                   and model_version = ?
+                             order by abs(score - 0.5) asc
+                             limit ?
+                          ''',
+                          (model_version[0], limit))
+                return c.fetchall()
 
-            c.execute('''select z, x, y, score
-                         from scores
-                         natural left join (
-                            select 1 as t, z, x, y
-                            from with_solar)
-                         where t is null
-                               and score is not null
-                               and model_version = ?
-                         order by abs(score - 0.5) asc
-                         limit ?
-                      ''',
-                      (model_version, limit))
-            return c.fetchall()
+        tiles, _ = self.tiles_for_scoring('', limit)
+        return tiles
 
     def tiles_with_solar(self):
         with self.transaction() as c:
