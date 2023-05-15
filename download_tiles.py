@@ -91,8 +91,7 @@ def main():
         return 1
 
     db_path = pathlib.Path(args.database)
-    os.makedirs(db_path.parent, exist_ok=True)
-    db = database.Database(args.database)
+    db = database.Database(db_path)
 
     nib_api_key = util.load_key(args.NiB_key)
     pop_data = read_population_data(args.population, args.min_population)
