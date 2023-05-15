@@ -135,7 +135,7 @@ def main():
     parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--limit', type=int)
 
-    parser.add_argument('--batch-size', default=2, type=int)
+    parser.add_argument('--batch-size', default=10, type=int)
     args = parser.parse_args()
 
     db = database.Database(args.database)
