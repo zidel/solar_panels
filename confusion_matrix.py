@@ -23,7 +23,7 @@ def load_nib_data(path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--database', default='/mnt/NiB/tiles.db')
     parser.add_argument('--model', default='vgg19')
     parser.add_argument('--load-model', default='data/model.hdf5')
     args = parser.parse_args()

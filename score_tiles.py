@@ -97,7 +97,7 @@ def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit,
         z = tile[0]
         x = tile[1]
         y = tile[2]
-        path = 'data/NiB/{}/{}/{}.jpeg'.format(z, x, y)
+        path = '/mnt/NiB/{}/{}/{}.jpeg'.format(z, x, y)
         paths.append(path)
         if not pathlib.Path(path).exists():
             progress.log('Downloading {}/{}/{}'.format(z, x, y))
@@ -129,7 +129,7 @@ def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit,
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--database', default='/mnt/NiB/tiles.db')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--model', default='vgg19')
     parser.add_argument('--load-model', default='data/model.hdf5')

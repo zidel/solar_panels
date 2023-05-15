@@ -6,7 +6,7 @@ import util
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--database', default='/mnt/NiB/tiles.db')
     args = parser.parse_args()
 
     db = database.Database(args.database)

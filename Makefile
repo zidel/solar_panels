@@ -177,7 +177,6 @@ compare_models : data/vgg19_lr4_bg3.hdf5 \
 
 clean :
 	$(RM) .flake8.marker
-	$(RM) data/tiles.db
 	$(RM) data/.download.marker
 	$(RM) data/.training.marker
 	$(RM) data/.score.marker

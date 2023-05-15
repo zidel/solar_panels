@@ -24,7 +24,7 @@ def send_script():
 
 @app.route('/api/review/next_tile')
 def get_next_tile_for_review():
-    db = database.Database('data/tiles.db')
+    db = database.Database('/mnt/NiB/tiles.db')
     tiles = db.tiles_for_review(limit=1)
     if not tiles:
         return '', 204
@@ -47,13 +47,13 @@ def get_next_tile_for_review():
 
 
 def _copy_tile(z, x, y, has_solar):
-    src = pathlib.Path('data/NiB/{}/{}/{}.jpeg'.format(z, x, y))
+    src = pathlib.Path('/mnt/NiB/{}/{}/{}.jpeg'.format(z, x, y))
     if not src.exists():
         return
 
     tile_hash = util.hash_file(src)
     dir_name = 'solar' if has_solar else 'not_solar'
-    dst = pathlib.Path('data/unvalidated_labels/{}/{}.jpeg'.format(
+    dst = pathlib.Path('/mnt/NiB/unvalidated_labels/{}/{}.jpeg'.format(
         dir_name,
         tile_hash,
         ))
@@ -78,7 +78,7 @@ def accept_tile_response():
     else:
         return 400, 'Bad "response" value'
 
-    db = database.Database('data/tiles.db')
+    db = database.Database('/mnt/NiB/tiles.db')
     try:
         if has_solar is not None:
             with db.transaction() as c:
@@ -99,13 +99,13 @@ def accept_tile_response():
 
 @app.route('/api/tiles/<z>/<x>/<y>.jpeg')
 def get_nib_tile(z, x, y):
-    path = pathlib.Path('data/NiB/{}/{}/{}.jpeg'.format(z, x, y))
+    path = pathlib.Path('/mnt/NiB/{}/{}/{}.jpeg'.format(z, x, y))
     if not path.exists():
         nib_api_key = util.load_key('secret/NiB_key.json')
         download_tiles.download_single_tile(nib_api_key, z, x, y)
 
     return flask.send_from_directory(
-            'data/NiB',
+            '/mnt/NiB',
             '{}/{}/{}.jpeg'.format(z, x, y))
 
 
