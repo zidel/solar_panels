@@ -142,11 +142,13 @@ def main():
     random.shuffle(tiles_with_solar)
     random.shuffle(tiles_without_solar)
 
-    images_per_category = min(len(tiles_with_solar), len(tiles_without_solar))
+    images_per_category = max(min(len(tiles_with_solar),
+                                  len(tiles_without_solar)),
+                              1)
     tiles = tiles_with_solar[:images_per_category] \
         + tiles_without_solar[:int(images_per_category
                                    * args.background_scale)]
-    training_set_size = int(len(tiles) * 0.9)
+    training_set_size = max(int(len(tiles) * 0.9), 1)
 
     random.shuffle(tiles)
     training_tiles = tiles[:training_set_size]
@@ -171,10 +173,13 @@ def main():
     dataset = dataset.batch(args.batch_size)
     dataset = dataset.repeat()
 
-    validation_data = tf.data.Dataset.from_tensor_slices(validation_tiles)
-    validation_data = validation_data.map(load_image_data,
-                                          num_parallel_calls=tf.data.AUTOTUNE)
-    validation_data = validation_data.batch(args.batch_size)
+    validation_data = None
+    if validation_tiles:
+        validation_data = tf.data.Dataset.from_tensor_slices(validation_tiles)
+        validation_data = validation_data.map(
+                load_image_data,
+                num_parallel_calls=tf.data.AUTOTUNE)
+        validation_data = validation_data.batch(args.batch_size)
 
     m = model.get(args.model, args.load_model, args.learning_rate)
 
