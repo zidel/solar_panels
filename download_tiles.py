@@ -1,6 +1,5 @@
 import argparse
 import csv
-import json
 import os
 import pathlib
 import requests

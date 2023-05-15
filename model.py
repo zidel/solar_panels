@@ -84,7 +84,8 @@ def vgg16(input_layer, input_shape):
 
 
 def mobile_v2(input_layer, input_shape):
-    processed = tf.keras.applications.mobilenet_v2.preprocess_input(input_layer)
+    processed = tf.keras.applications.mobilenet_v2.preprocess_input(
+            input_layer)
     return keras.applications.mobilenet_v2.MobileNetV2(
             include_top=False,
             input_tensor=processed,
@@ -102,7 +103,8 @@ def resnet_152_v2(input_layer, input_shape):
 
 
 def inception_resnet_v2(input_layer, input_shape):
-    processed = tf.keras.applications.inception_resnet_v2.preprocess_input(input_layer)
+    processed = tf.keras.applications.inception_resnet_v2.preprocess_input(
+            input_layer)
     return keras.applications.inception_resnet_v2.InceptionResNetV2(
             include_top=False,
             input_tensor=processed,

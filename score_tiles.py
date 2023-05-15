@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import math
 import pathlib
 import sys
 import tensorflow
@@ -66,7 +65,7 @@ class Progress(object):
 def load_image_from_path(input_path, channels):
     input_data = tensorflow.io.read_file(input_path)
     input_data = tensorflow.io.decode_jpeg(input_data, channels=channels)
-    input_data = tensorflow.cast(input_data, tensorflow.float32)# / 255.0
+    input_data = tensorflow.cast(input_data, tensorflow.float32)  # / 255.0
     return input_data
 
 
@@ -88,7 +87,8 @@ def process_prediction(cursor, tile, result, model_version):
             timestamp)
 
 
-def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit, tiles):
+def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit,
+                tiles):
     if not tiles:
         return
 
@@ -149,7 +149,8 @@ def main():
         while True:
             tiles, count = db.tiles_for_scoring(model_version, 1000)
             progress.remaining(count)
-            score_tiles(db, nib_api_key, progress, m, model_version, args.batch_size, args.limit, tiles)
+            score_tiles(db, nib_api_key, progress, m, model_version,
+                        args.batch_size, args.limit, tiles)
     finally:
         progress.clear()
         print('Scored {} tiles'.format(progress.done))

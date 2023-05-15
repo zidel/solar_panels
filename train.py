@@ -17,7 +17,7 @@ def tile_to_paths(z, x, y):
 def read_image(path, channels=3):
     data = tf.io.read_file(path)
     data = tf.io.decode_jpeg(data, channels=channels)
-    return tf.cast(data, tf.float32)# / 255.0
+    return tf.cast(data, tf.float32)  # / 255.0
 
 
 def load_image_data(tile_data):
@@ -144,7 +144,8 @@ def main():
 
     images_per_category = min(len(tiles_with_solar), len(tiles_without_solar))
     tiles = tiles_with_solar[:images_per_category] \
-        + tiles_without_solar[:int(images_per_category * args.background_scale)]
+        + tiles_without_solar[:int(images_per_category
+                                   * args.background_scale)]
     training_set_size = int(len(tiles) * 0.9)
 
     random.shuffle(tiles)

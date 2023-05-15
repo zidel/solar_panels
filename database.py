@@ -131,9 +131,9 @@ class Database(object):
 
 
 def add_tile(cursor, z, x, y):
-    assert(type(z) == int)
-    assert(type(x) == int)
-    assert(type(y) == int)
+    assert type(z) == int
+    assert type(x) == int
+    assert type(y) == int
 
     cursor.execute('''insert into tiles
                       (z, x, y)
@@ -144,12 +144,12 @@ def add_tile(cursor, z, x, y):
 
 
 def write_score(cursor, z, x, y, score, model_version, timestamp):
-    assert(type(z) == int)
-    assert(type(x) == int)
-    assert(type(y) == int)
-    assert(type(score) == float)
-    assert(type(model_version) == str)
-    assert(type(timestamp) == str)
+    assert type(z) == int
+    assert type(x) == int
+    assert type(y) == int
+    assert type(score) == float
+    assert type(model_version) == str
+    assert type(timestamp) == str
 
     cursor.execute('''insert into scores
                       (z, x, y, score, model_version, timestamp)
@@ -163,10 +163,10 @@ def write_score(cursor, z, x, y, score, model_version, timestamp):
 
 
 def set_has_solar(cursor, z, x, y, has_solar):
-    assert(type(z) == int)
-    assert(type(x) == int)
-    assert(type(y) == int)
-    assert(type(has_solar) == bool)
+    assert type(z) == int
+    assert type(x) == int
+    assert type(y) == int
+    assert type(has_solar) == bool
 
     cursor.execute('''insert into with_solar
                       (z, x, y, has_solar)
