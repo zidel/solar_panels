@@ -131,7 +131,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='/mnt/NiB/tiles.db')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
-    parser.add_argument('--model', default='vgg19')
+    parser.add_argument('--model', default='VGG19')
     parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--limit', type=int)
 
