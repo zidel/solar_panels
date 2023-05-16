@@ -59,25 +59,17 @@ class Database(object):
         query_fmt = '''select {}
                        from tiles
                        natural left join scores
-                       where model_version is null or model_version != ?{}
+                       where model_version is null or model_version != ?
                        {}
                     '''
         with self.transaction() as c:
-            c.execute(query_fmt.format('count(*)', '', ''), [current_model])
+            c.execute(query_fmt.format('count(*)', ''), [current_model])
             count = c.fetchone()[0]
 
             c.execute(query_fmt.format('z, x, y, score',
-                                       ' and score > 0.991',
                                        'limit ?'),
                       [current_model, limit])
             tiles = c.fetchall()
-
-            if len(tiles) < limit:
-                c.execute(query_fmt.format('z, x, y, score',
-                                           ' and score <= 0.1',
-                                           'limit ?'),
-                          [current_model, limit - len(tiles)])
-                tiles += c.fetchall()
 
         return (tiles, count)
 
