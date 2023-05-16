@@ -148,6 +148,9 @@ def main():
     try:
         while True:
             tiles, count = db.tiles_for_scoring(model_version, 1000)
+            if not tiles:
+                break
+
             progress.remaining(count)
             score_tiles(db, nib_api_key, progress, m, model_version,
                         args.batch_size, args.limit, tiles)
