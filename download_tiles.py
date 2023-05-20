@@ -20,7 +20,7 @@ def nib_url(z, x, y, key):
 
 def download_tile(url: str, dest: pathlib.Path):
     if not dest.parent.exists():
-        os.makedirs(dest.parent)
+        os.makedirs(dest.parent, exist_ok=True)
 
     r = requests.get(url)
     r.raise_for_status()
