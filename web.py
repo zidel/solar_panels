@@ -27,7 +27,7 @@ def get_next_tile_for_review():
     if not tiles:
         return '', 204
 
-    tile_hash, z, x, y, score = list(tiles)[0]
+    tile_hash, z, x, y, score, model_version = list(tiles)[0]
 
     top, left = util.tile2deg(x, y, z)
     bottom, right = util.tile2deg(x + 1, y + 1, z)
@@ -38,6 +38,7 @@ def get_next_tile_for_review():
             'x': x,
             'y': y,
             'score': score,
+            'model_version': model_version,
             'top': top,
             'left': left,
             'bottom': bottom,

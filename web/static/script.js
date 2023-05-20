@@ -12,6 +12,7 @@ function update_current_tile(tile)
     x = tile['x'];
     y = tile['y'];
     score = tile['score'];
+    model_version = tile['model_version'];
     bbox_top = tile['top'];
     bbox_left = tile['left'];
     bbox_bottom = tile['bottom'];
@@ -25,6 +26,7 @@ function update_current_tile(tile)
 
     document.getElementById('review_tile').src = `/api/tiles/by-hash/${tile_hash}.jpeg`;
     document.getElementById('review_score').textContent = `${score}`
+    document.getElementById('model_version').textContent = `${model_version}`
 
     document.getElementById('context_00').src = `/api/tiles/by-pos/${z}/${x - 1}/${y - 1}.jpeg`;
     document.getElementById('context_01').src = `/api/tiles/by-pos/${z}/${x + 0}/${y - 1}.jpeg`;
