@@ -161,6 +161,7 @@ def main():
     input_images = training_set_size
     batch_count = math.ceil(input_images / args.batch_size)
     epochs = math.ceil(args.step_count / input_images)
+    epochs = min(epochs, 10)
     print('{} images / batch * {} batches * {} epochs -> {} steps'.format(
         args.batch_size,
         batch_count,
