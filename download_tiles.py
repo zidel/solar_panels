@@ -19,7 +19,7 @@ def nib_url(z, x, y, key):
 
 
 def download_single_tile(nib_api_key, z, x, y):
-    # start = time.time()
+    start = time.time()
 
     r = requests.get(nib_url(z, x, y, nib_api_key))
     r.raise_for_status()
@@ -39,9 +39,9 @@ def download_single_tile(nib_api_key, z, x, y):
             written = True
             f.write(r.content)
 
-    # duration = time.time() - start
-    # if duration < 1.0:
-    #     time.sleep(1.0 - duration)
+    duration = time.time() - start
+    if duration < 0.1:
+        time.sleep(0.1 - duration)
 
     return written, full_hash
 
