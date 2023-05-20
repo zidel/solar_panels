@@ -99,7 +99,7 @@ def augment_tiles(solar, non_solar, background_scale):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--database', default='/mnt/NiB/tiles.db')
+    parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--model', type=str, default='VGG19')
     parser.add_argument('--load-model', type=str)
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
