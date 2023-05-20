@@ -12,7 +12,7 @@ PYTHON_SRC := \
 	web.py \
 
 
-all : flake8 data/.score.marker
+all : flake8 data/.score.marker compare_models
 flake8 : .flake8.marker
 
 
