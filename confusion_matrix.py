@@ -26,10 +26,12 @@ def main():
     parser.add_argument('--database', default='/mnt/NiB/tiles.db')
     parser.add_argument('--model', default='vgg19')
     parser.add_argument('--load-model', default='data/model.hdf5')
+    parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     args = parser.parse_args()
 
     db = database.Database(args.database)
     model_version = util.hash_file(args.load_model)
+    nib_api_key = util.load_key(args.NiB_key)
 
     with db.transaction() as c:
         c.execute('''select z, x, y, score
@@ -45,6 +47,7 @@ def main():
     try:
         score_tiles.score_tiles(
                 db,
+                nib_api_key,
                 progress,
                 model.get(args.model, args.load_model),
                 model_version,
