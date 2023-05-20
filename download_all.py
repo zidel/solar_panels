@@ -19,6 +19,7 @@ def main():
     db = database.Database(db_path)
     nib_api_key = util.load_key(args.NiB_key)
 
+    new_tiles = tqdm.tqdm(desc='New images')
     with db.transaction() as c:
         tiles = database.all_tiles(c)
         positions = set()
@@ -28,7 +29,8 @@ def main():
         for z, x, y in tqdm.tqdm(positions):
             written, tile_hash = download_tiles.download_single_tile(nib_api_key, z, x, y)
             if written:
-                database.add_tile(cursor, z, x, y, tile_hash)
+                database.add_tile(c, z, x, y, tile_hash)
+                new_tiles.update()
 
 if __name__ == '__main__':
     sys.exit(main())
