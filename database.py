@@ -84,28 +84,29 @@ class Database(object):
                          where timestamp in (
                              select max(timestamp)
                              from scores
-                             )
-                         limit 1
+                             natural left join (
+                                 select 1 as t, tile_hash
+                                 from with_solar)
+                             where t is null)
                       ''')
             model_version = c.fetchone()
-            if model_version is not None:
-                c.execute('''select tile_hash, z, x, y, score
-                             from scores
-                             natural left join (
-                                select 1 as t, tile_hash
-                                from with_solar)
-                             natural join tile_positions
-                             where t is null
-                                   and score is not null
-                                   and model_version = ?
-                             order by score desc
-                             limit ?
-                          ''',
-                          (model_version[0], limit))
-                return c.fetchall()
+            if model_version is None:
+                return []
 
-        tiles, _ = self.tiles_for_scoring('', limit)
-        return tiles
+            c.execute('''select tile_hash, z, x, y, score, model_version
+                         from scores
+                         natural left join (
+                            select 1 as t, tile_hash
+                            from with_solar)
+                         natural join tile_positions
+                         where t is null
+                               and score is not null
+                               and model_version = ?
+                         order by score desc
+                         limit ?
+                      ''',
+                      (model_version[0], limit))
+            return c.fetchall()
 
     def tiles_with_solar(self):
         with self.transaction() as c:
