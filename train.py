@@ -10,8 +10,10 @@ import database
 import model
 
 
-def tile_to_paths(z, x, y):
-    return pathlib.Path('/mnt/NiB/{}/{}/{}.jpeg'.format(z, x, y))
+def tile_to_paths(tile_hash):
+    dir_name = tile_hash[:2]
+    file_name = tile_hash[2:]
+    return pathlib.Path('data/images/{}/{}.jpeg'.format(dir_name, file_name))
 
 
 def read_image(path, channels=3):
@@ -114,8 +116,8 @@ def main():
     db = database.Database(args.database)
     tiles_with_solar = []
     tiles_without_solar = []
-    for z, x, y, has_solar in db.trainable():
-        nib_path = tile_to_paths(z, x, y)
+    for tile_hash, has_solar in db.trainable():
+        nib_path = tile_to_paths(tile_hash)
         data = (str(nib_path),
                 'true' if has_solar else 'false',
                 '0',

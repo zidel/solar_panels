@@ -34,7 +34,7 @@ def main():
     nib_api_key = util.load_key(args.NiB_key)
 
     with db.transaction() as c:
-        c.execute('''select z, x, y, score
+        c.execute('''select tile_hash, score
                      from with_solar
                      natural left join scores
                      where model_version is null or model_version != ?
@@ -58,15 +58,17 @@ def main():
         progress.clear()
 
     with db.transaction() as c:
-        c.execute('''select z, x, y, has_solar, score
+        c.execute('''select has_solar, score
                      from with_solar
                      natural join scores
-                  ''')
+                     where model_version = ?
+                  ''',
+                  [model_version])
         data = c.fetchall()
 
     labels = []
     predictions = []
-    for z, x, y, has_solar, result in data:
+    for has_solar, result in data:
         labels.append(2 if has_solar else 0)
 
         if result < 0.1:

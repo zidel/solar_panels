@@ -30,34 +30,31 @@ class Database(object):
 
     def _init_database(self):
         with self.transaction() as c:
-            c.execute('''create table if not exists tiles (
+            c.execute('''create table if not exists tile_positions (
+                             tile_hash string not null,
                              z integer not null,
                              x integer not null,
                              y integer not null,
-                             primary key (z, x, y))
+                             primary key (tile_hash))
                       ''')
             c.execute('''create table if not exists with_solar (
-                             z integer not null,
-                             x integer not null,
-                             y integer not null,
+                             tile_hash string not null,
                              has_solar bool not null,
-                             primary key (z, x, y)
-                             foreign key (z, x, y) references tiles)
+                             primary key (tile_hash)
+                             foreign key (tile_hash) references tile_positions)
                       ''')
             c.execute('''create table if not exists scores (
-                             z integer not null,
-                             x integer not null,
-                             y integer not null,
+                             tile_hash string not null,
                              score real not null,
                              model_version string not null,
                              timestamp string not null,
-                             primary key (z, x, y),
-                             foreign key (z, x, y) references tiles)
+                             primary key (tile_hash),
+                             foreign key (tile_hash) references tile_positions)
                       ''')
 
     def tiles_for_scoring(self, current_model, limit):
         query_fmt = '''select {}
-                       from tiles
+                       from tile_positions
                        natural left join scores
                        where model_version is null or model_version != ?
                        {}
@@ -66,7 +63,7 @@ class Database(object):
             c.execute(query_fmt.format('count(*)', ''), [current_model])
             count = c.fetchone()[0]
 
-            c.execute(query_fmt.format('z, x, y, score',
+            c.execute(query_fmt.format('tile_hash, score',
                                        'limit ?'),
                       [current_model, limit])
             tiles = c.fetchall()
@@ -75,7 +72,7 @@ class Database(object):
 
     def trainable(self):
         with self.transaction() as c:
-            c.execute('''select z, x, y, has_solar
+            c.execute('''select tile_hash, has_solar
                          from with_solar
                       ''')
             return c.fetchall()
@@ -92,15 +89,16 @@ class Database(object):
                       ''')
             model_version = c.fetchone()
             if model_version is not None:
-                c.execute('''select z, x, y, score
+                c.execute('''select tile_hash, z, x, y, score
                              from scores
                              natural left join (
-                                select 1 as t, z, x, y
+                                select 1 as t, tile_hash
                                 from with_solar)
+                             natural join tile_positions
                              where t is null
                                    and score is not null
                                    and model_version = ?
-                             order by abs(score - 0.5) asc
+                             order by score desc
                              limit ?
                           ''',
                           (model_version[0], limit))
@@ -111,67 +109,96 @@ class Database(object):
 
     def tiles_with_solar(self):
         with self.transaction() as c:
-            c.execute('''select z, x, y
+            c.execute('''select tile_hash
                          from with_solar
                          where has_solar = True
                       ''')
             return c.fetchall()
 
-    def remove_score(self, z, x, y):
+    def remove_score(self, tile_hash):
         with self.transaction() as c:
             c.execute('''delete from scores
-                         where z = ? and x = ? and y = ?
+                         where tile_hash = ?
                       ''',
-                      (z, x, y))
+                      (tile_hash,))
 
 
-def add_tile(cursor, z, x, y):
+def get_tile_hash(cursor, z, x, y):
     assert type(z) == int
     assert type(x) == int
     assert type(y) == int
 
-    cursor.execute('''insert into tiles
-                      (z, x, y)
-                      values (?, ?, ?)
-                      on conflict do nothing
+    cursor.execute('''select tile_hash
+                      from tile_positions
+                      where z = ?
+                            and x = ?
+                            and y = ?
+                      limit 1
                    ''',
                    (z, x, y))
+    row = cursor.fetchone()
+    return row[0] if row else None
 
 
-def write_score(cursor, z, x, y, score, model_version, timestamp):
+def add_tile(cursor, z, x, y, tile_hash):
     assert type(z) == int
     assert type(x) == int
     assert type(y) == int
+    assert type(tile_hash) == str
+
+    cursor.execute('''insert into tile_positions
+                      (tile_hash, z, x, y)
+                      values (?, ?, ?, ?)
+                      on conflict do nothing
+                   ''',
+                   (tile_hash, z, x, y))
+
+
+def has_tile(cursor, z, x, y):
+    assert type(z) == int
+    assert type(x) == int
+    assert type(y) == int
+
+    cursor.execute('''select count(*)
+                      from tile_positions
+                      where z = ?
+                            and x = ?
+                            and y = ?
+                   ''',
+                   (z, x, y))
+    return cursor.fetchone()[0] > 0
+
+
+def write_score(cursor, tile_hash, score, model_version, timestamp):
+    assert type(tile_hash) == str
     assert type(score) == float
     assert type(model_version) == str
     assert type(timestamp) == str
 
     cursor.execute('''insert into scores
-                      (z, x, y, score, model_version, timestamp)
-                      values (?, ?, ?, ?, ?, ?)
-                      on conflict(z, x, y) do
+                      (tile_hash, score, model_version, timestamp)
+                      values (?, ?, ?, ?)
+                      on conflict(tile_hash) do
                       update set score=excluded.score,
                                  model_version=excluded.model_version,
                                  timestamp=excluded.timestamp
                    ''',
-                   (z, x, y, score, model_version, timestamp))
+                   (tile_hash, score, model_version, timestamp))
 
 
-def set_has_solar(cursor, z, x, y, has_solar):
-    assert type(z) == int
-    assert type(x) == int
-    assert type(y) == int
+def set_has_solar(cursor, tile_hash, has_solar):
+    assert type(tile_hash) == str
     assert type(has_solar) == bool
 
     cursor.execute('''insert into with_solar
-                      (z, x, y, has_solar)
-                      values (?, ?, ?, ?)
+                      (tile_hash, has_solar)
+                      values (?, ?)
                    ''',
-                   (z, x, y, has_solar))
+                   (tile_hash, has_solar))
 
 
 def all_tiles(cursor):
-    cursor.execute('''select z, x, y
-                      from tiles
+    cursor.execute('''select tile_hash, z, x, y
+                      from tile_positions
                    ''')
     return cursor.fetchall()

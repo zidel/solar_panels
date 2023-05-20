@@ -7,6 +7,7 @@ function onload()
 
 function update_current_tile(tile)
 {
+    tile_hash = tile['tile_hash'];
     z = tile['z'];
     x = tile['x'];
     y = tile['y'];
@@ -16,28 +17,30 @@ function update_current_tile(tile)
     bbox_bottom = tile['bottom'];
     bbox_right = tile['right'];
 
+    document.getElementById('tile_hash').textContent = `${tile_hash}`;
     document.getElementById('tile_z').textContent = `${z}`;
     document.getElementById('tile_x').textContent = `${x}`;
     document.getElementById('tile_y').textContent = `${y}`;
     document.getElementById('tile_bbox').textContent = `${bbox_top},${bbox_left},${bbox_bottom},${bbox_right}`;
 
-    document.getElementById('review_tile').src = `/api/tiles/${z}/${x}/${y}.jpeg`;
+    document.getElementById('review_tile').src = `/api/tiles/by-hash/${tile_hash}.jpeg`;
     document.getElementById('review_score').textContent = `${score}`
 
-    document.getElementById('context_00').src = `/api/tiles/${z}/${x - 1}/${y - 1}.jpeg`;
-    document.getElementById('context_01').src = `/api/tiles/${z}/${x + 0}/${y - 1}.jpeg`;
-    document.getElementById('context_02').src = `/api/tiles/${z}/${x + 1}/${y - 1}.jpeg`;
+    document.getElementById('context_00').src = `/api/tiles/by-pos/${z}/${x - 1}/${y - 1}.jpeg`;
+    document.getElementById('context_01').src = `/api/tiles/by-pos/${z}/${x + 0}/${y - 1}.jpeg`;
+    document.getElementById('context_02').src = `/api/tiles/by-pos/${z}/${x + 1}/${y - 1}.jpeg`;
 
-    document.getElementById('context_10').src = `/api/tiles/${z}/${x - 1}/${y + 0}.jpeg`;
-    document.getElementById('context_12').src = `/api/tiles/${z}/${x + 1}/${y + 0}.jpeg`;
+    document.getElementById('context_10').src = `/api/tiles/by-pos/${z}/${x - 1}/${y + 0}.jpeg`;
+    document.getElementById('context_12').src = `/api/tiles/by-pos/${z}/${x + 1}/${y + 0}.jpeg`;
 
-    document.getElementById('context_20').src = `/api/tiles/${z}/${x - 1}/${y + 1}.jpeg`;
-    document.getElementById('context_21').src = `/api/tiles/${z}/${x + 0}/${y + 1}.jpeg`;
-    document.getElementById('context_22').src = `/api/tiles/${z}/${x + 1}/${y + 1}.jpeg`;
+    document.getElementById('context_20').src = `/api/tiles/by-pos/${z}/${x - 1}/${y + 1}.jpeg`;
+    document.getElementById('context_21').src = `/api/tiles/by-pos/${z}/${x + 0}/${y + 1}.jpeg`;
+    document.getElementById('context_22').src = `/api/tiles/by-pos/${z}/${x + 1}/${y + 1}.jpeg`;
 }
 
 function get_next_to_check()
 {
+    document.getElementById('tile_hash').textContent = "";
     document.getElementById('tile_z').textContent = "";
     document.getElementById('tile_x').textContent = "";
     document.getElementById('tile_y').textContent = "";
@@ -55,6 +58,7 @@ function get_next_to_check()
 
 function current_tile()
 {
+    tile_hash = document.getElementById('tile_hash').textContent;
     z = parseInt(document.getElementById('tile_z').textContent);
     x = parseInt(document.getElementById('tile_x').textContent);
     y = parseInt(document.getElementById('tile_y').textContent);
@@ -63,6 +67,7 @@ function current_tile()
     bbox = bbox.split(',');
 
     return {
+        'tile_hash': tile_hash,
         'z': z,
         'x': x,
         'y': y,
@@ -100,9 +105,7 @@ function submit_result(result)
     tile = current_tile();
 
     data = {
-        'z': tile['z'],
-        'x': tile['x'],
-        'y': tile['y'],
+        'tile_hash': tile['tile_hash'],
         'response': result,
     }
 

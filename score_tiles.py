@@ -1,11 +1,9 @@
 import argparse
 import datetime
-import pathlib
 import sys
 import tensorflow
 import time
 
-import download_tiles
 import database
 import model
 import util
@@ -73,15 +71,13 @@ def load_nib_data(path):
     return load_image_from_path(path, 3)
 
 
-def process_prediction(cursor, tile, result, model_version):
+def process_prediction(cursor, tile_hash, result, model_version):
     now = datetime.datetime.now()
     timestamp = now.isoformat()
 
     database.write_score(
             cursor,
-            tile[0],
-            tile[1],
-            tile[2],
+            tile_hash,
             float(result),
             model_version,
             timestamp)
@@ -93,15 +89,12 @@ def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit,
         return
 
     paths = []
-    for tile in tiles:
-        z = tile[0]
-        x = tile[1]
-        y = tile[2]
-        path = '/mnt/NiB/{}/{}/{}.jpeg'.format(z, x, y)
+    for tile_data in tiles:
+        tile_hash = tile_data[0]
+        dir_name = tile_hash[:2]
+        file_name = tile_hash[2:]
+        path = 'data/images/{}/{}.jpeg'.format(dir_name, file_name)
         paths.append(path)
-        if not pathlib.Path(path).exists():
-            progress.log('Downloading {}/{}/{}'.format(z, x, y))
-            download_tiles.download_single_tile(nib_api_key, z, x, y)
 
     dataset = tensorflow.data.Dataset.from_tensor_slices(paths)
     dataset = dataset.map(
@@ -114,14 +107,14 @@ def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit,
         results = m.predict(batch, batch_size=batch_size)
         with db.transaction() as c:
             for result in results:
-                tile = tiles[image_index]
+                tile_data = tiles[image_index]
                 process_prediction(
                         c,
-                        tile,
+                        tile_data[0],
                         result,
                         model_version)
                 image_index += 1
-                progress.finished(1, float(result), tile[3])
+                progress.finished(1, float(result), tile_data[1])
 
         if limit and image_index >= limit:
             break
