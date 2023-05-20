@@ -168,3 +168,10 @@ def set_has_solar(cursor, z, x, y, has_solar):
                       values (?, ?, ?, ?)
                    ''',
                    (z, x, y, has_solar))
+
+
+def all_tiles(cursor):
+    cursor.execute('''select z, x, y
+                      from tiles
+                   ''')
+    return cursor.fetchall()
