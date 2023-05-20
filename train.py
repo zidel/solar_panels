@@ -105,7 +105,7 @@ def main():
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
     parser.add_argument('--tensorboard', type=str, default=None)
 
-    parser.add_argument('--batch-size', default=128, type=int)
+    parser.add_argument('--batch-size', default=256, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
     parser.add_argument('--learning-rate', default=1e-4, type=float)
     parser.add_argument('--background-scale', default=2.0, type=float)
