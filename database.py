@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 
 
@@ -50,6 +51,13 @@ class Database(object):
                              timestamp string not null,
                              primary key (tile_hash),
                              foreign key (tile_hash) references tile_positions)
+                      ''')
+            c.execute('''create table if not exists last_update (
+                             z integer not null,
+                             x integer not null,
+                             y integer not null,
+                             timestamp string not null,
+                             primary key (z, x, y))
                       ''')
 
     def tiles_for_scoring(self, current_model, limit):
@@ -203,3 +211,32 @@ def all_tiles(cursor):
                       from tile_positions
                    ''')
     return cursor.fetchall()
+
+
+def last_checked(cursor, z, x, y):
+    cursor.execute('''select timestamp
+                      from last_update
+                      where z = ?
+                            and x = ?
+                            and y = ?
+                   ''',
+                   [z, x, y])
+    row = cursor.fetchone()
+    if row is None:
+        return None
+
+    return datetime.datetime.fromisoformat(row[0])
+
+
+def mark_checked(cursor, z, x, y):
+    assert type(z) == int
+    assert type(x) == int
+    assert type(y) == int
+
+    now = datetime.datetime.now()
+    timestamp = now.isoformat()
+    cursor.execute('''insert into last_update
+                      (z, x, y, timestamp)
+                      values (?, ?, ?, ?)
+                   ''',
+                   [z, x, y, timestamp])
