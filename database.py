@@ -254,5 +254,7 @@ def mark_checked(cursor, z, x, y):
     cursor.execute('''insert into last_update
                       (z, x, y, timestamp)
                       values (?, ?, ?, ?)
+                      on conflict do
+                      update set timestamp=excluded.timestamp
                    ''',
                    [z, x, y, timestamp])
