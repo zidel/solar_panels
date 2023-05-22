@@ -3,7 +3,6 @@ import sqlite3
 import flask
 
 import database
-import download_tiles
 import util
 
 
@@ -95,7 +94,7 @@ def get_nib_tile(z, x, y):
 
     if tile_hash is None:
         nib_api_key = util.load_key('secret/NiB_key.json')
-        _, tile_hash = download_tiles.download_single_tile(
+        _, tile_hash = util.download_single_tile(
                 nib_api_key, z, x, y)
         with db.transaction() as cursor:
             database.add_tile_hash(cursor, z, x, y, tile_hash)
