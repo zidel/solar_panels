@@ -4,6 +4,7 @@
 PYTHON_SRC := \
 	database.py \
 	download_tiles.py \
+	import_tiles_by_population.py \
 	model.py \
 	score_tiles.py \
 	to_gpx.py \
@@ -20,8 +21,11 @@ flake8 : .flake8.marker
 	flake8 $(PYTHON_SRC)
 	touch .flake8.marker
 
-data/.download.marker : download_tiles.py database.py Makefile
-	python3 download_tiles.py --zoom 18
+data/.tiles_from_pop.marker : import_tiles_by_population.py database.py util.py Makefile
+	python3 import_tiles_by_population.py --zoom 18
+
+data/.download.marker : data/.tiles_from_pop.marker download_tiles.py database.py util.py Makefile
+	python3 download_tiles.py
 	touch data/.download.marker
 
 data/.training.marker : data/.download.marker train.py Makefile

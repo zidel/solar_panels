@@ -149,18 +149,19 @@ def get_tile_hash(cursor, z, x, y):
     return row[0] if row else None
 
 
-def add_tile(cursor, z, x, y, tile_hash):
+def add_tile(cursor, z, x, y):
     assert type(z) == int
     assert type(x) == int
     assert type(y) == int
-    assert type(tile_hash) == str
 
-    cursor.execute('''insert into tile_positions
-                      (tile_hash, z, x, y)
+    epoch = datetime.datetime.fromtimestamp(0)
+    timestamp = epoch.isoformat()
+    cursor.execute('''insert into last_update
+                      (z, x, y, timestamp)
                       values (?, ?, ?, ?)
                       on conflict do nothing
                    ''',
-                   (tile_hash, z, x, y))
+                   (z, x, y, timestamp))
 
 
 def has_tile(cursor, z, x, y):
@@ -176,6 +177,21 @@ def has_tile(cursor, z, x, y):
                    ''',
                    (z, x, y))
     return cursor.fetchone()[0] > 0
+
+
+def add_tile_hash(cursor, z, x, y, tile_hash):
+    assert type(z) == int
+    assert type(x) == int
+    assert type(y) == int
+    assert type(tile_hash) == str
+
+    add_tile(cursor, z, x, y)
+    cursor.execute('''insert into tile_positions
+                      (tile_hash, z, x, y)
+                      values (?, ?, ?, ?)
+                      on conflict do nothing
+                   ''',
+                   (tile_hash, z, x, y))
 
 
 def write_score(cursor, tile_hash, score, model_version, timestamp):

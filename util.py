@@ -1,6 +1,10 @@
 import hashlib
 import json
 import math
+import pathlib
+import time
+
+import requests
 
 
 def deg2tile(lat_deg, lon_deg, zoom):
@@ -35,3 +39,42 @@ def hash_file(path):
 def load_key(path):
     j = json.load(open(path, 'rb'))
     return j['key']
+
+
+def nib_url(z, x, y, key):
+    fmt = 'https://waapi.webatlas.no/maptiles/tiles' \
+            + '/webatlas-orto-newup/wa_grid/{}/{}/{}.jpeg?api_key={}'
+    return fmt.format(z, x, y, key)
+
+
+def download_single_tile(nib_api_key, z, x, y):
+    start = time.time()
+
+    while True:
+        r = requests.get(nib_url(z, x, y, nib_api_key))
+        if r.status_code != 200:
+            time.sleep(60)
+            continue
+
+        break
+
+    h = hashlib.sha256()
+    h.update(r.content)
+    full_hash = h.hexdigest()
+    dir_name = full_hash[:2]
+    file_name = full_hash[2:]
+
+    # file_path = pathlib.Path(f'/mnt/NiB/images/{dir_name}/{file_name}.jpeg')
+    file_path = pathlib.Path(f'data/images/{dir_name}/{file_name}.jpeg')
+    written = False
+    if not file_path.exists():
+        file_path.parent.mkdir(exist_ok=True)
+        with open(file_path, 'wb') as f:
+            written = True
+            f.write(r.content)
+
+    duration = time.time() - start
+    if duration < 0.1:
+        time.sleep(0.1 - duration)
+
+    return written, full_hash

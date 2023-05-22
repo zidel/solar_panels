@@ -7,7 +7,6 @@ import sqlite3
 import tqdm
 
 import database
-import download_tiles
 import util
 
 
@@ -50,20 +49,18 @@ def get_points_from_overpass():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
-    parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     args = parser.parse_args()
 
     db = database.Database(args.database)
-    nib_api_key = util.load_key(args.NiB_key)
 
     for point in tqdm.tqdm(get_points_from_overpass()):
         xtile, ytile = util.deg2tile(point['lat'], point['lon'], 18)
-        _, tile_hash = download_tiles.download_single_tile(
+        _, tile_hash = util.download_single_tile(
                 nib_api_key, 18, xtile, ytile)
 
         try:
             with db.transaction() as c:
-                database.add_tile(c, 18, xtile, ytile, tile_hash)
+                database.add_tile_hash(c, 18, xtile, ytile, tile_hash)
                 now = datetime.datetime.now()
                 timestamp = now.isoformat()
                 database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
