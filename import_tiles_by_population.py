@@ -45,7 +45,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--population', default='population.csv')
-    parser.add_argument('--min-population', default=90000, type=int)
+    parser.add_argument('--min-population', default=10000, type=int)
     parser.add_argument('--zoom', action='append', type=int)
     args = parser.parse_args()
 
