@@ -23,6 +23,7 @@ flake8 : .flake8.marker
 
 data/.tiles_from_pop.marker : import_tiles_by_population.py database.py util.py Makefile
 	python3 import_tiles_by_population.py --zoom 18
+	touch data/.tiles_from_pop.marker
 
 data/.download.marker : data/.tiles_from_pop.marker download_tiles.py database.py util.py Makefile
 	python3 download_tiles.py
