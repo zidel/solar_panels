@@ -21,8 +21,13 @@ def nib_url(z, x, y, key):
 def download_single_tile(nib_api_key, z, x, y):
     start = time.time()
 
-    r = requests.get(nib_url(z, x, y, nib_api_key))
-    r.raise_for_status()
+    while True:
+        r = requests.get(nib_url(z, x, y, nib_api_key))
+        if r.status_code != 200:
+            time.sleep(60)
+            continue
+
+        break
 
     h = hashlib.sha256()
     h.update(r.content)
