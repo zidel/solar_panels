@@ -1,6 +1,7 @@
-import sqlite3
+import random
 
 import flask
+import sqlite3
 
 import database
 import util
@@ -90,9 +91,11 @@ def get_nib_tile(z, x, y):
 
     db = database.Database('data/tiles.db')
     with db.transaction() as cursor:
-        tile_hash = database.get_tile_hash(cursor, z, x, y)
+        tiles = database.get_tile_hash(cursor, z, x, y)
 
-    if tile_hash is None:
+    if tiles:
+        tile_hash = random.choice(tiles)
+    else:
         nib_api_key = util.load_key('secret/NiB_key.json')
         _, tile_hash = util.download_single_tile(
                 nib_api_key, z, x, y)
