@@ -142,11 +142,9 @@ def get_tile_hash(cursor, z, x, y):
                       where z = ?
                             and x = ?
                             and y = ?
-                      limit 1
                    ''',
                    (z, x, y))
-    row = cursor.fetchone()
-    return row[0] if row else None
+    return [row[0] for row in cursor]
 
 
 def add_tile(cursor, z, x, y):
