@@ -49,9 +49,11 @@ def get_points_from_overpass():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     args = parser.parse_args()
 
     db = database.Database(args.database)
+    nib_api_key = util.load_key(args.NiB_key)
 
     for point in tqdm.tqdm(get_points_from_overpass()):
         xtile, ytile = util.deg2tile(point['lat'], point['lon'], 18)
