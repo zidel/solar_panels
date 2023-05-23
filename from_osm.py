@@ -57,19 +57,24 @@ def main():
 
     for point in tqdm.tqdm(get_points_from_overpass()):
         xtile, ytile = util.deg2tile(point['lat'], point['lon'], 18)
-        _, tile_hash = util.download_single_tile(
-                nib_api_key, 18, xtile, ytile)
 
-        try:
+        have_tiles = False
+        with db.transaction() as c:
+            if database.get_tile_hash(c, 18, xtile, ytile):
+                have_tiles = True
+
+        if not have_tiles:
+            _, tile_hash = util.download_single_tile(
+                    nib_api_key, 18, xtile, ytile)
             with db.transaction() as c:
                 database.add_tile_hash(c, 18, xtile, ytile, tile_hash)
 
-                now = datetime.datetime.now()
-                timestamp = now.isoformat()
-                for tile_hash in database.get_tile_hash(c, 18, xtile, ytile):
-                    database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
-        except sqlite3.IntegrityError as e:
-            pass
+        with db.transaction() as c:
+            now = datetime.datetime.now()
+            timestamp = now.isoformat()
+            for tile_hash in database.get_tile_hash(c, 18, xtile, ytile):
+                database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
+
 
 if __name__ == '__main__':
     main()
