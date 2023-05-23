@@ -61,9 +61,11 @@ def main():
         try:
             with db.transaction() as c:
                 database.add_tile_hash(c, 18, xtile, ytile, tile_hash)
+
                 now = datetime.datetime.now()
                 timestamp = now.isoformat()
-                database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
+                for tile_hash in database.get_tile_hash(c, 18, xtile, ytile):
+                    database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
         except sqlite3.IntegrityError as e:
             pass
 
