@@ -147,6 +147,17 @@ def get_tile_hash(cursor, z, x, y):
     return [row[0] for row in cursor]
 
 
+def get_tile_pos(cursor, tile_hash):
+    assert type(tile_hash) == str
+
+    cursor.execute('''select z, x, y
+                      from tile_positions
+                      where tile_hash = ?
+                   ''',
+                   [tile_hash])
+    return cursor.fetchone()
+
+
 def add_tile(cursor, z, x, y):
     assert type(z) == int
     assert type(x) == int
