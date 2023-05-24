@@ -3,6 +3,8 @@ import csv
 import pathlib
 import sys
 
+import tqdm
+
 import database
 import util
 
@@ -57,7 +59,7 @@ def main():
     db = database.Database(db_path)
 
     pop_data = read_population_data(args.population, args.min_population)
-    for west, south, east, north, pop in pop_data:
+    for west, south, east, north, pop in tqdm.tqdm(pop_data):
         def per_tile(z, x, y):
             with db.transaction() as cursor:
                 database.add_tile(cursor, z, x, y)
