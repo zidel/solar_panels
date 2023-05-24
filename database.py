@@ -31,17 +31,25 @@ class Database(object):
 
     def _init_database(self):
         with self.transaction() as c:
+            c.execute('''create table if not exists last_update (
+                             z integer not null,
+                             x integer not null,
+                             y integer not null,
+                             timestamp string not null,
+                             primary key (z, x, y))
+                      ''')
             c.execute('''create table if not exists tile_positions (
                              tile_hash string not null,
                              z integer not null,
                              x integer not null,
                              y integer not null,
-                             primary key (tile_hash))
+                             primary key (tile_hash),
+                             foreign key (z, x, y) references last_update)
                       ''')
             c.execute('''create table if not exists with_solar (
                              tile_hash string not null,
                              has_solar bool not null,
-                             primary key (tile_hash)
+                             primary key (tile_hash),
                              foreign key (tile_hash) references tile_positions)
                       ''')
             c.execute('''create table if not exists scores (
@@ -51,13 +59,6 @@ class Database(object):
                              timestamp string not null,
                              primary key (tile_hash),
                              foreign key (tile_hash) references tile_positions)
-                      ''')
-            c.execute('''create table if not exists last_update (
-                             z integer not null,
-                             x integer not null,
-                             y integer not null,
-                             timestamp string not null,
-                             primary key (z, x, y))
                       ''')
 
     def tiles_for_scoring(self, current_model, limit):
@@ -232,8 +233,8 @@ def set_has_solar(cursor, tile_hash, has_solar):
 
 
 def all_tiles(cursor):
-    cursor.execute('''select tile_hash, z, x, y
-                      from tile_positions
+    cursor.execute('''select z, x, y
+                      from last_update
                    ''')
     return cursor.fetchall()
 

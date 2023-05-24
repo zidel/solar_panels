@@ -24,12 +24,9 @@ def main():
 
     new_tiles = tqdm.tqdm(desc='New images')
     now = datetime.datetime.now()
-    with db.transaction() as c:
-        tiles = database.all_tiles(c)
-
     positions = set()
     with db.transaction() as c:
-        for _, z, x, y in tiles:
+        for z, x, y in database.all_tiles(c):
             timestamp = database.last_checked(c, z, x, y)
             if timestamp is not None:
                 delta = now - timestamp
