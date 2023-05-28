@@ -1,4 +1,5 @@
 import argparse
+import pathlib
 import sys
 
 import tensorflow
@@ -27,11 +28,14 @@ def main():
     parser.add_argument('--model', default='VGG19')
     parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
+    parser.add_argument('--tile-path', type=str, default="data/images")
+    parser.add_argument('--batch-size', default=10, type=int)
     args = parser.parse_args()
 
     db = database.Database(args.database)
     model_version = util.hash_file(args.load_model)
     nib_api_key = util.load_key(args.NiB_key)
+    image_dir = pathlib.Path(args.tile_path)
 
     with db.transaction() as c:
         c.execute('''select tile_hash, score
@@ -47,11 +51,12 @@ def main():
     try:
         score_tiles.score_tiles(
                 db,
+                image_dir,
                 nib_api_key,
                 progress,
                 model.get(args.model, args.load_model),
                 model_version,
-                2,
+                args.batch_size,
                 None,
                 tiles)
     finally:
