@@ -72,7 +72,7 @@ def download_single_tile(image_dir, nib_api_key, z, x, y):
     file_path = image_dir / f'{dir_name}/{file_name}.jpeg'
     written = False
     if not file_path.exists():
-        file_path.parent.mkdir(exist_ok=True)
+        file_path.parent.mkdir(exist_ok=True, parents=True)
         with open(file_path, 'wb') as f:
             written = True
             f.write(r.content)
