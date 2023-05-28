@@ -107,16 +107,21 @@ def score_tiles(db, image_dir, nib_api_key, progress, m, model_version, batch_si
     image_index = 0
     for batch in dataset:
         results = m.predict(batch, batch_size=batch_size)
-        with db.transaction() as c:
-            for result in results:
-                tile_data = tiles[image_index]
-                process_prediction(
-                        c,
-                        tile_data[0],
-                        result,
-                        model_version)
-                image_index += 1
-                progress.finished(1, float(result), tile_data[1])
+        while True:
+            try:
+                with db.transaction() as c:
+                    for result in results:
+                        tile_data = tiles[image_index]
+                        process_prediction(
+                                c,
+                                tile_data[0],
+                                result,
+                                model_version)
+                        image_index += 1
+                        progress.finished(1, float(result), tile_data[1])
+                break
+            except sqlite3.OperationalError:
+                continue
 
         if limit and image_index >= limit:
             break
