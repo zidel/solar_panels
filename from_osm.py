@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import json
+import pathlib
 import requests
 import sqlite3
 
@@ -51,10 +52,12 @@ def main():
     parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--zoom', type=int, default=18)
+    parser.add_argument('--tile-path', type=str, default='data/images')
     args = parser.parse_args()
 
     db = database.Database(args.database)
     nib_api_key = util.load_key(args.NiB_key)
+    image_dir = pathlib.Path(args.tile_path)
 
     for point in tqdm.tqdm(get_points_from_overpass()):
         xtile, ytile = util.deg2tile(point['lat'], point['lon'], args.zoom)
@@ -66,7 +69,7 @@ def main():
 
         if not have_tiles:
             _, tile_hash = util.download_single_tile(
-                    nib_api_key, args.zoom, xtile, ytile)
+                    image_dir, nib_api_key, args.zoom, xtile, ytile)
             with db.transaction() as c:
                 database.add_tile_hash(c, args.zoom, xtile, ytile, tile_hash)
 

@@ -47,7 +47,7 @@ def nib_url(z, x, y, key):
     return fmt.format(z, x, y, key)
 
 
-def download_single_tile(nib_api_key, z, x, y):
+def download_single_tile(image_dir, nib_api_key, z, x, y):
     start = time.time()
 
     while True:
@@ -64,8 +64,7 @@ def download_single_tile(nib_api_key, z, x, y):
     dir_name = full_hash[:2]
     file_name = full_hash[2:]
 
-    # file_path = pathlib.Path(f'/mnt/NiB/images/{dir_name}/{file_name}.jpeg')
-    file_path = pathlib.Path(f'data/images/{dir_name}/{file_name}.jpeg')
+    file_path = image_dir / f'{dir_name}/{file_name}.jpeg'
     written = False
     if not file_path.exists():
         file_path.parent.mkdir(exist_ok=True)
