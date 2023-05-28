@@ -10,10 +10,10 @@ import database
 import model
 
 
-def tile_to_paths(tile_hash):
+def tile_to_paths(tile_dir, tile_hash):
     dir_name = tile_hash[:2]
     file_name = tile_hash[2:]
-    return pathlib.Path('data/images/{}/{}.jpeg'.format(dir_name, file_name))
+    return tile_dir / f'{dir_name}/{file_name}.jpeg'
 
 
 def read_image(path, channels=3):
@@ -102,6 +102,7 @@ def augment_tiles(solar, non_solar, background_scale):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--tile-path', type=str, default='data/images')
     parser.add_argument('--model', type=str, default='VGG19')
     parser.add_argument('--load-model', type=str)
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
@@ -113,11 +114,13 @@ def main():
     parser.add_argument('--background-scale', default=2.0, type=float)
     args = parser.parse_args()
 
+    image_dir = pathlib.Path(args.tile_path)
+
     db = database.Database(args.database)
     tiles_with_solar = []
     tiles_without_solar = []
     for tile_hash, has_solar in db.trainable():
-        nib_path = tile_to_paths(tile_hash)
+        nib_path = tile_to_paths(image_dir, tile_hash)
         data = (str(nib_path),
                 'true' if has_solar else 'false',
                 '0',

@@ -1,8 +1,10 @@
 import argparse
 import datetime
+import pathlib
 import sys
-import tensorflow
 import time
+
+import tensorflow
 
 import database
 import model
@@ -83,7 +85,7 @@ def process_prediction(cursor, tile_hash, result, model_version):
             timestamp)
 
 
-def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit,
+def score_tiles(db, image_dir, nib_api_key, progress, m, model_version, batch_size, limit,
                 tiles):
     if not tiles:
         return
@@ -93,8 +95,8 @@ def score_tiles(db, nib_api_key, progress, m, model_version, batch_size, limit,
         tile_hash = tile_data[0]
         dir_name = tile_hash[:2]
         file_name = tile_hash[2:]
-        path = 'data/images/{}/{}.jpeg'.format(dir_name, file_name)
-        paths.append(path)
+        path = image_dir / f'{dir_name}/{file_name}.jpeg'
+        paths.append(str(path))
 
     dataset = tensorflow.data.Dataset.from_tensor_slices(paths)
     dataset = dataset.map(
@@ -124,6 +126,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
+    parser.add_argument('--tile-path', type=str, default="data/images")
     parser.add_argument('--model', default='VGG19')
     parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--limit', type=int)
@@ -134,6 +137,7 @@ def main():
     db = database.Database(args.database)
     model_version = util.hash_file(args.load_model)
     nib_api_key = util.load_key(args.NiB_key)
+    image_dir = pathlib.Path(args.tile_path)
 
     m = model.get(args.model, args.load_model)
 
@@ -145,7 +149,7 @@ def main():
                 break
 
             progress.remaining(count)
-            score_tiles(db, nib_api_key, progress, m, model_version,
+            score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
                         args.batch_size, args.limit, tiles)
     finally:
         progress.clear()
