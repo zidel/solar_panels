@@ -69,11 +69,16 @@ def main():
             with db.transaction() as c:
                 database.add_tile_hash(c, 18, xtile, ytile, tile_hash)
 
-        with db.transaction() as c:
-            now = datetime.datetime.now()
-            timestamp = now.isoformat()
-            for tile_hash in database.get_tile_hash(c, 18, xtile, ytile):
-                database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
+        while True:
+            try:
+                with db.transaction() as c:
+                    now = datetime.datetime.now()
+                    timestamp = now.isoformat()
+                    for tile_hash in database.get_tile_hash(c, 18, xtile, ytile):
+                        database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
+            except sqlite3.OperationalError:
+                continue
+            break
 
 
 if __name__ == '__main__':
