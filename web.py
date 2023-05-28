@@ -1,4 +1,5 @@
 import datetime
+import pathlib
 import random
 
 import flask
@@ -6,6 +7,11 @@ import sqlite3
 
 import database
 import util
+
+
+db_path = pathlib.Path('data/tiles.db')
+nib_key_path = pathlib.Path('secret/NiB_key.json')
+tile_path = pathlib.Path('data/images')
 
 
 app = flask.Flask(__name__, static_url_path='')
@@ -23,7 +29,7 @@ def send_script():
 
 @app.route('/api/review/next_tile')
 def get_next_tile_for_review():
-    db = database.Database('data/tiles.db')
+    db = database.Database(db_path)
     tiles = db.tiles_for_review(limit=1)
     if not tiles:
         return '', 204
@@ -78,7 +84,7 @@ def accept_tile_response():
     else:
         return 400, 'Bad "response" value'
 
-    db = database.Database('data/tiles.db')
+    db = database.Database(db_path)
     try:
         if has_solar is not None:
             with db.transaction() as c:
@@ -105,7 +111,7 @@ def get_tile_by_hash(tile_hash):
     dir_name = tile_hash[:2]
     file_name = tile_hash[2:]
     return flask.send_from_directory(
-            'data/images',
+            tile_path,
             '{}/{}.jpeg'.format(dir_name, file_name))
 
 
@@ -115,16 +121,16 @@ def get_nib_tile(z, x, y):
     x = int(x)
     y = int(y)
 
-    db = database.Database('data/tiles.db')
+    db = database.Database(db_path)
     with db.transaction() as cursor:
         tiles = database.get_tile_hash(cursor, z, x, y)
 
     if tiles:
         tile_hash = random.choice(tiles)
     else:
-        nib_api_key = util.load_key('secret/NiB_key.json')
-        _, tile_hash = util.download_single_tile(
-                nib_api_key, z, x, y)
+        nib_api_key = util.load_key(nib_key_path)
+        written, tile_hash = util.download_single_tile(
+                tile_path, nib_api_key, z, x, y)
         with db.transaction() as cursor:
             database.add_tile_hash(cursor, z, x, y, tile_hash)
 
