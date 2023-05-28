@@ -51,7 +51,12 @@ def download_single_tile(image_dir, nib_api_key, z, x, y):
     start = time.time()
 
     while True:
-        r = requests.get(nib_url(z, x, y, nib_api_key))
+        try:
+            r = requests.get(nib_url(z, x, y, nib_api_key))
+        except requests.exceptions.ConnectionError:
+            time.sleep(60)
+            continue
+
         if r.status_code != 200:
             time.sleep(60)
             continue
