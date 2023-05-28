@@ -73,7 +73,7 @@ class Database(object):
             count = c.fetchone()[0]
 
             c.execute(query_fmt.format('tile_hash, score',
-                                       'limit ?'),
+                                       'order by score desc limit ?'),
                       [current_model, limit])
             tiles = c.fetchall()
 
