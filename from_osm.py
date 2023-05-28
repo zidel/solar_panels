@@ -50,31 +50,32 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
+    parser.add_argument('--zoom', type=int, default=18)
     args = parser.parse_args()
 
     db = database.Database(args.database)
     nib_api_key = util.load_key(args.NiB_key)
 
     for point in tqdm.tqdm(get_points_from_overpass()):
-        xtile, ytile = util.deg2tile(point['lat'], point['lon'], 18)
+        xtile, ytile = util.deg2tile(point['lat'], point['lon'], args.zoom)
 
         have_tiles = False
         with db.transaction() as c:
-            if database.get_tile_hash(c, 18, xtile, ytile):
+            if database.get_tile_hash(c, args.zoom, xtile, ytile):
                 have_tiles = True
 
         if not have_tiles:
             _, tile_hash = util.download_single_tile(
-                    nib_api_key, 18, xtile, ytile)
+                    nib_api_key, args.zoom, xtile, ytile)
             with db.transaction() as c:
-                database.add_tile_hash(c, 18, xtile, ytile, tile_hash)
+                database.add_tile_hash(c, args.zoom, xtile, ytile, tile_hash)
 
         while True:
             try:
                 with db.transaction() as c:
                     now = datetime.datetime.now()
                     timestamp = now.isoformat()
-                    for tile_hash in database.get_tile_hash(c, 18, xtile, ytile):
+                    for tile_hash in database.get_tile_hash(c, args.zoom, xtile, ytile):
                         database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
             except sqlite3.OperationalError:
                 continue
