@@ -131,8 +131,9 @@ def get_nib_tile(z, x, y):
         nib_api_key = util.load_key(nib_key_path)
         written, tile_hash = util.download_single_tile(
                 tile_path, nib_api_key, z, x, y)
-        with db.transaction() as cursor:
-            database.add_tile_hash(cursor, z, x, y, tile_hash)
+        if written:
+            with db.transaction() as cursor:
+                database.add_tile_hash(cursor, z, x, y, tile_hash)
 
     return flask.redirect(f'/api/tiles/by-hash/{tile_hash}.jpeg', code=302)
 
