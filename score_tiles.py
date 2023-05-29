@@ -4,6 +4,7 @@ import pathlib
 import sys
 import time
 
+import sqlite3
 import tensorflow
 
 import database
@@ -85,8 +86,8 @@ def process_prediction(cursor, tile_hash, result, model_version):
             timestamp)
 
 
-def score_tiles(db, image_dir, nib_api_key, progress, m, model_version, batch_size, limit,
-                tiles):
+def score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
+                batch_size, limit, tiles):
     if not tiles:
         return
 

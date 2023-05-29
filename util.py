@@ -1,7 +1,6 @@
 import hashlib
 import json
 import math
-import pathlib
 import time
 
 import requests
