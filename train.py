@@ -99,6 +99,19 @@ def augment_tiles(solar, non_solar, background_scale):
     return solar, non_solar
 
 
+def format_tile_data(image_dir, tiles):
+    result = []
+    for tile_hash, has_solar in tiles:
+        nib_path = tile_to_paths(image_dir, tile_hash)
+        result.append((str(nib_path),
+                'true' if has_solar else 'false',
+                '0',
+                '0',
+                '0',
+                ))
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
@@ -117,53 +130,16 @@ def main():
     image_dir = pathlib.Path(args.tile_path)
 
     db = database.Database(args.database)
-    tiles_with_solar = []
-    tiles_without_solar = []
-    for tile_hash, has_solar in db.trainable():
-        nib_path = tile_to_paths(image_dir, tile_hash)
-        data = (str(nib_path),
-                'true' if has_solar else 'false',
-                '0',
-                '0',
-                '0',
-                )
-        if has_solar:
-            tiles_with_solar.append(data)
-        else:
-            tiles_without_solar.append(data)
-
-    print('Before augmentation: {} solar / {} non solar'.format(
-        len(tiles_with_solar),
-        len(tiles_without_solar),
-        ))
-    tiles_with_solar, tiles_without_solar = augment_tiles(
-            tiles_with_solar,
-            tiles_without_solar,
-            args.background_scale)
-    print('After augmentation: {} solar / {} non solar'.format(
-        len(tiles_with_solar),
-        len(tiles_without_solar),
-        ))
-    random.shuffle(tiles_with_solar)
-    random.shuffle(tiles_without_solar)
-
-    images_per_category = max(min(len(tiles_with_solar),
-                                  len(tiles_without_solar)),
-                              1)
-    tiles = tiles_with_solar[:images_per_category] \
-        + tiles_without_solar[:int(images_per_category
-                                   * args.background_scale)]
-    training_set_size = max(int(len(tiles) * 0.9), 1)
-
-    random.shuffle(tiles)
-    training_tiles = tiles[:training_set_size]
-    validation_tiles = tiles[training_set_size:]
+    with db.transaction() as c:
+        training_tiles = format_tile_data(image_dir, database.training_tiles(c))
+        validation_tiles = format_tile_data(image_dir,
+                                            database.validation_tiles(c))
     print('Training with {} tiles, validating with {}'.format(
         len(training_tiles),
         len(validation_tiles),
         ))
 
-    input_images = training_set_size
+    input_images = len(training_tiles)
     batch_count = math.ceil(input_images / args.batch_size)
     epochs = math.ceil(args.step_count / input_images)
     epochs = min(epochs, 10)

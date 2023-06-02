@@ -60,6 +60,17 @@ class Database(object):
                              primary key (tile_hash),
                              foreign key (tile_hash) references tile_positions)
                       ''')
+            c.execute('''create table if not exists training_set (
+                             tile_hash string not null,
+                             primary key (tile_hash),
+                             foreign key (tile_hash) references with_solar)
+                      ''')
+            c.execute('''create table if not exists validation_set (
+                             tile_hash string not null,
+                             primary key (tile_hash),
+                             foreign key (tile_hash) references with_solar)
+                      ''')
+
 
     def tiles_for_scoring(self, current_model, limit):
         query_fmt = '''select {}
@@ -78,13 +89,6 @@ class Database(object):
             tiles = c.fetchall()
 
         return (tiles, count)
-
-    def trainable(self):
-        with self.transaction() as c:
-            c.execute('''select tile_hash, has_solar
-                         from with_solar
-                      ''')
-            return c.fetchall()
 
     def tiles_for_review(self, limit):
         with self.transaction() as c:
@@ -270,3 +274,19 @@ def mark_checked(cursor, z, x, y):
                       update set timestamp=excluded.timestamp
                    ''',
                    [z, x, y, timestamp])
+
+
+def training_tiles(cursor):
+    cursor.execute('''select tile_hash, has_solar
+                      from training_set
+                      natural join with_solar
+                   ''')
+    return cursor.fetchall()
+
+
+def validation_tiles(cursor):
+    cursor.execute('''select tile_hash, has_solar
+                      from validation_set
+                      natural join with_solar
+                   ''')
+    return cursor.fetchall()
