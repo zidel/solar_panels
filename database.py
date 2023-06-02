@@ -114,6 +114,8 @@ class Database(object):
                          order by score desc
                          limit ?
                       ''',
+                         #order by score desc
+                         #order by abs(score - 0.5) asc
                       (model_version[0], limit))
             return c.fetchall()
 
