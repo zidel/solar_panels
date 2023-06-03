@@ -74,13 +74,9 @@ def main():
     image_dir = pathlib.Path(args.tile_path)
 
     with db.transaction() as c:
-        c.execute('''select tile_hash, score
-                     from with_solar
-                     natural left join scores
-                     where model_version is null or model_version != ?
-                  ''',
-                  (model_version,))
-        tiles = c.fetchall()
+        tiles = [(tile_hash, None)
+                 for tile_hash, _
+                 in database.validation_tiles(c)]
 
     progress = score_tiles.Progress()
     progress.remaining(len(tiles))
