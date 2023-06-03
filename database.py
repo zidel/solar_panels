@@ -245,6 +245,13 @@ def all_tiles(cursor):
     return cursor.fetchall()
 
 
+def all_tile_hashes(cursor):
+    cursor.execute('''select tile_hash
+                      from tile_positions
+                   ''')
+    return cursor.fetchall()
+
+
 def last_checked(cursor, z, x, y):
     cursor.execute('''select timestamp
                       from last_update
@@ -290,3 +297,31 @@ def validation_tiles(cursor):
                       natural join with_solar
                    ''')
     return cursor.fetchall()
+
+
+def unassigned_tile_hashes(cursor):
+    cursor.execute('''select tile_hash
+                      from with_solar
+                      where tile_hash not in (
+                          select tile_hash
+                          from training_set
+                          natural full join validation_set)
+                   ''')
+    return cursor.fetchall()
+
+
+def assign_to_set(cursor, tile_hash, dataset):
+    assert type(tile_hash) == str
+
+    table_mapping = {
+            'training': 'training_set',
+            'validation': 'validation_set',
+            }
+    assert dataset in table_mapping
+    table_name = table_mapping[dataset]
+
+    cursor.execute(f'''insert into {table_name}
+                       (tile_hash)
+                       values (?)
+                   ''',
+                   [tile_hash])
