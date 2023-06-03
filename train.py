@@ -72,7 +72,15 @@ def apply_vertical_flips(tiles):
     return output
 
 
-def augment_tiles(solar, non_solar, background_scale):
+def augment_tiles(tiles, background_scale):
+    solar = []
+    non_solar = []
+    for data in tiles:
+        if data[1] == 'true':
+            solar.append(data)
+        else:
+            non_solar.append(data)
+
     solar = apply_rotation(solar)
     solar = apply_horizontal_flips(solar)
     solar = apply_vertical_flips(solar)
@@ -96,7 +104,7 @@ def augment_tiles(solar, non_solar, background_scale):
         non_solar = apply_vertical_flips(non_solar)
         non_solar_scaling_needed /= 2
 
-    return solar, non_solar
+    return solar + non_solar
 
 
 def format_tile_data(image_dir, tiles):
@@ -134,6 +142,8 @@ def main():
         training_tiles = format_tile_data(image_dir, database.training_tiles(c))
         validation_tiles = format_tile_data(image_dir,
                                             database.validation_tiles(c))
+
+    training_tiles = augment_tiles(training_tiles, args.background_scale)
     print('Training with {} tiles, validating with {}'.format(
         len(training_tiles),
         len(validation_tiles),
