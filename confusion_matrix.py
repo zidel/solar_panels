@@ -87,12 +87,11 @@ def main():
     image_dir = pathlib.Path(args.tile_path)
 
     with db.transaction() as c:
-        tiles = [(tile_hash, None)
-                 for tile_hash, _
-                 in database.validation_tiles(c)]
+        tiles_for_scoring = database.validation_tiles_for_scoring(
+                c, model_version)
 
     progress = score_tiles.Progress()
-    progress.remaining(len(tiles))
+    progress.remaining(len(tiles_for_scoring))
     try:
         score_tiles.score_tiles(
                 db,
@@ -103,27 +102,26 @@ def main():
                 model_version,
                 args.batch_size,
                 None,
-                tiles)
+                tiles_for_scoring)
     finally:
         progress.clear()
 
     with db.transaction() as c:
-        c.execute('''select has_solar, score
-                     from with_solar
-                     natural join scores
-                     where model_version = ?
-                  ''',
-                  [model_version])
-        data = c.fetchall()
+        tiles = database.validation_tiles(c)
 
     labels = []
     predictions = []
-    for has_solar, result in data:
-        labels.append(2 if has_solar else 0)
+    for _, has_solar, score in tiles:
+        if has_solar is None:
+            labels.append(1)
+        elif has_solar:
+            labels.append(2)
+        else:
+            labels.append(0)
 
-        if result < 0.1:
+        if score < 0.1:
             predictions.append(0)
-        elif result < 0.9:
+        elif score < 0.9:
             predictions.append(1)
         else:
             predictions.append(2)

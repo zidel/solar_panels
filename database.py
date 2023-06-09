@@ -292,10 +292,22 @@ def training_tiles(cursor):
 
 
 def validation_tiles(cursor):
-    cursor.execute('''select tile_hash, has_solar
+    cursor.execute('''select tile_hash, has_solar, score
                       from validation_set
-                      natural join with_solar
+                      natural left join with_solar
+                      natural left join scores
                    ''')
+    return cursor.fetchall()
+
+
+def validation_tiles_for_scoring(cursor, current_model):
+    cursor.execute('''select tile_hash, score
+                      from validation_set
+                      natural left join scores
+                      where model_version is null
+                          or model_version != ?
+                   ''',
+                   [current_model])
     return cursor.fetchall()
 
 
