@@ -30,6 +30,11 @@ def print_matrix(matrix):
                 'unknown': 100 * int(matrix[0][1]) / total,
                 'positive': 100 * int(matrix[0][2]) / total,
                 },
+            'unknown': {
+                'negative': 100 * int(matrix[1][0]) / total,
+                'unknown': 100 * int(matrix[1][1]) / total,
+                'positive': 100 * int(matrix[1][2]) / total,
+                },
             'true': {
                 'negative': 100 * int(matrix[2][0]) / total,
                 'unknown': 100 * int(matrix[2][1]) / total,
@@ -42,13 +47,17 @@ def print_matrix(matrix):
         results['true']['negative'],
         results['true']['unknown'],
         results['true']['positive']))
+    print('Unk: {:5.0f}% {:5.0f}% {:5.0f}%'.format(
+        results['unknown']['negative'],
+        results['unknown']['unknown'],
+        results['unknown']['positive']))
     print('Neg: {:5.0f}% {:5.0f}% {:5.0f}%'.format(
         results['false']['negative'],
         results['false']['unknown'],
         results['false']['positive']))
 
     true_positives = int(matrix[2][2])
-    all_pred_positive = int(matrix[0][2] + matrix[2][2])
+    all_pred_positive = int(matrix[0][2] + matrix[1][2] + matrix[2][2])
     all_real_positive = int(sum(matrix[2]))
 
     print()
