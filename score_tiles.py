@@ -150,7 +150,7 @@ def main():
     progress = Progress()
     try:
         while True:
-            tiles, count = db.tiles_for_scoring(model_version, 1000)
+            tiles, count = db.tiles_for_scoring(model_version, 1000000)
             if not tiles:
                 break
 
