@@ -284,7 +284,7 @@ def mark_checked(cursor, z, x, y):
 
 
 def training_tiles(cursor):
-    cursor.execute('''select tile_hash, has_solar
+    cursor.execute('''select tile_hash, has_solar, 0
                       from training_set
                       natural join with_solar
                    ''')

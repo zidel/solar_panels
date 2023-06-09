@@ -109,7 +109,10 @@ def augment_tiles(tiles, background_scale):
 
 def format_tile_data(image_dir, tiles):
     result = []
-    for tile_hash, has_solar in tiles:
+    for tile_hash, has_solar, _ in tiles:
+        if has_solar is None:
+            continue
+
         nib_path = tile_to_paths(image_dir, tile_hash)
         result.append((str(nib_path),
                 'true' if has_solar else 'false',
