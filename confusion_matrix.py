@@ -61,8 +61,12 @@ def print_matrix(matrix):
     all_real_positive = int(sum(matrix[2]))
 
     print()
-    print('Positive accuracy: {:.0f}%'.format(
-        100 * true_positives / all_pred_positive))
+    if all_pred_positive > 0:
+        print('Positive accuracy: {:.0f}%'.format(
+            100 * true_positives / all_pred_positive))
+    else:
+        print('Positive accuracy: N/A ({} / {})'.format(
+            true_positives, all_pred_positive))
     print('Positive coverage: {:.0f}%'.format(
         100 * true_positives / all_real_positive))
 
