@@ -54,6 +54,7 @@ def get_next_tile_for_review():
 
 
 def score_neighbours(cursor, own_hash):
+    return
     now = datetime.datetime.now().isoformat()
     z, own_x, own_y = database.get_tile_pos(cursor, own_hash)
     for neighbour_x in [own_x - 1, own_x, own_x + 1]:
