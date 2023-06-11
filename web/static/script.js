@@ -83,12 +83,14 @@ function current_tile()
 function key_handler(event) {
     if (event.key === "j") {
         open_josm()
-    } else if (event.key === "y") {
-        submit_result('true');
-    } else if (event.key === "n") {
-        submit_result('false');
     } else if (event.key === "m") {
         submit_result('skip');
+    } else if (event.key === "n") {
+        submit_result('false');
+    } else if (event.key === "s") {
+        review_surrounding_tiles();
+    } else if (event.key === "y") {
+        submit_result('true');
     }
 }
 
@@ -120,4 +122,20 @@ function submit_result(result)
     })
     .then((r) => r.json())
     .then(get_next_to_check);
+}
+
+function review_surrounding_tiles()
+{
+    tile = current_tile();
+    data = {
+        'tile_hash': tile['tile_hash'],
+    }
+
+    fetch('/api/review/surrounding', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
 }

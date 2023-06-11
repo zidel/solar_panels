@@ -54,7 +54,6 @@ def get_next_tile_for_review():
 
 
 def score_neighbours(cursor, own_hash):
-    return
     now = datetime.datetime.now().isoformat()
     z, own_x, own_y = database.get_tile_pos(cursor, own_hash)
     for neighbour_x in [own_x - 1, own_x, own_x + 1]:
@@ -95,14 +94,22 @@ def accept_tile_response():
     except sqlite3.IntegrityError as e:
         print(e)
 
-    if has_solar:
-        while True:
-            try:
-                with db.transaction() as c:
-                    score_neighbours(c, tile_hash)
-                break
-            except sqlite3.OperationalError:
-                continue
+    return {}
+
+
+@app.route('/api/review/surrounding', methods=['POST'])
+def review_surrounding_tiles():
+    body = flask.request.json
+    tile_hash = body['tile_hash']
+
+    db = database.Database(db_path)
+    while True:
+        try:
+            with db.transaction() as c:
+                score_neighbours(c, tile_hash)
+            break
+        except sqlite3.OperationalError:
+            continue
 
     return {}
 
