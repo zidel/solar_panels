@@ -71,7 +71,6 @@ class Database(object):
                              foreign key (tile_hash) references with_solar)
                       ''')
 
-
     def tiles_for_scoring(self, current_model, limit):
         query_fmt = '''select {}
                        from tile_positions
@@ -118,8 +117,8 @@ class Database(object):
                          order by score desc
                          limit ?
                       ''',
-                         #order by score desc
-                         #order by abs(score - 0.5) asc
+                      # order by score desc
+                      # order by abs(score - 0.5) asc
                       (model_version[0], limit))
             return c.fetchall()
 

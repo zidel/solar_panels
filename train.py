@@ -2,7 +2,6 @@ import argparse
 import datetime
 import math
 import pathlib
-import random
 
 import tensorflow as tf
 
@@ -115,11 +114,11 @@ def format_tile_data(image_dir, tiles):
 
         nib_path = tile_to_paths(image_dir, tile_hash)
         result.append((str(nib_path),
-                'true' if has_solar else 'false',
-                '0',
-                '0',
-                '0',
-                ))
+                       'true' if has_solar else 'false',
+                       '0',
+                       '0',
+                       '0',
+                       ))
     return result
 
 
@@ -142,7 +141,8 @@ def main():
 
     db = database.Database(args.database)
     with db.transaction() as c:
-        training_tiles = format_tile_data(image_dir, database.training_tiles(c))
+        training_tiles = format_tile_data(image_dir,
+                                          database.training_tiles(c))
         validation_tiles = format_tile_data(image_dir,
                                             database.validation_tiles(c))
 
