@@ -135,7 +135,7 @@ def main():
     parser.add_argument('--batch-size', default=256, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
     parser.add_argument('--learning-rate', default=1e-4, type=float)
-    parser.add_argument('--background-scale', default=2.0, type=float)
+    parser.add_argument('--background-scale', default=1.0, type=float)
     args = parser.parse_args()
 
     image_dir = pathlib.Path(args.tile_path)
