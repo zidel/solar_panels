@@ -13,7 +13,7 @@ PYTHON_SRC := \
 	web.py \
 
 
-all : flake8 data/.score.marker
+all : flake8 data/.score.marker data/model_bg0.5.hdf5 data/model_bg2.hdf5 data/model_bg3.hdf5
 flake8 : .flake8.marker
 
 
@@ -29,12 +29,20 @@ data/.download.marker : data/.tiles_from_pop.marker download_tiles.py database.p
 	python3 download_tiles.py
 	touch data/.download.marker
 
-data/.training.marker : data/.download.marker train.py Makefile
-	python3 train.py
-	touch data/.training.marker
+data/model_bg0.5.hdf5 : data/.download.marker train.py Makefile
+	python3 train.py --save-to=data/model_bg0.5.hdf5
 
-data/.score.marker : data/.training.marker Makefile
-	python3 score_tiles.py
+data/model_bg1.hdf5 : data/.download.marker train.py Makefile
+	python3 train.py --save-to=data/model_bg1.hdf5
+
+data/model_bg2.hdf5 : data/.download.marker train.py Makefile
+	python3 train.py --save-to=data/model_bg2.hdf5
+
+data/model_bg3.hdf5 : data/.download.marker train.py Makefile
+	python3 train.py --save-to=data/model_bg3.hdf5
+
+data/.score.marker : data/model_bg1.hdf5 Makefile
+	python3 score_tiles.py --load-model=data/model_bg1.hdf5
 	touch data/.score.marker
 
 
@@ -45,8 +53,11 @@ web :
 clean :
 	$(RM) .flake8.marker
 	$(RM) data/.download.marker
-	$(RM) data/.training.marker
 	$(RM) data/.score.marker
 
 distclean : clean
-	$(RM) -r data/
+	$(RM) -r data/model_bg0.5.hdf5
+	$(RM) -r data/model_bg1.hdf5
+	$(RM) -r data/model_bg2.hdf5
+	$(RM) -r data/model_bg3.hdf5
+	$(RM) -r data/model.hdf5
