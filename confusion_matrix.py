@@ -26,32 +26,32 @@ def print_matrix(matrix):
     total = int(sum(sum(matrix)))
     results = {
             'false': {
-                'negative': 100 * int(matrix[0][0]) / total,
-                'unknown': 100 * int(matrix[0][1]) / total,
-                'positive': 100 * int(matrix[0][2]) / total,
+                'negative': int(matrix[0][0]),
+                'unknown': int(matrix[0][1]),
+                'positive': int(matrix[0][2]),
                 },
             'unknown': {
-                'negative': 100 * int(matrix[1][0]) / total,
-                'unknown': 100 * int(matrix[1][1]) / total,
-                'positive': 100 * int(matrix[1][2]) / total,
+                'negative': int(matrix[1][0]),
+                'unknown': int(matrix[1][1]),
+                'positive': int(matrix[1][2]),
                 },
             'true': {
-                'negative': 100 * int(matrix[2][0]) / total,
-                'unknown': 100 * int(matrix[2][1]) / total,
-                'positive': 100 * int(matrix[2][2]) / total,
+                'negative': int(matrix[2][0]),
+                'unknown': int(matrix[2][1]),
+                'positive': int(matrix[2][2]),
                 },
             }
 
     print('      P_neg  P_unk  P_pos')
-    print('Pos: {:5.0f}% {:5.0f}% {:5.0f}%'.format(
+    print('Pos: {: 6d} {: 6d} {: 6d}'.format(
         results['true']['negative'],
         results['true']['unknown'],
         results['true']['positive']))
-    print('Unk: {:5.0f}% {:5.0f}% {:5.0f}%'.format(
+    print('Unk: {: 6d} {: 6d} {: 6d}'.format(
         results['unknown']['negative'],
         results['unknown']['unknown'],
         results['unknown']['positive']))
-    print('Neg: {:5.0f}% {:5.0f}% {:5.0f}%'.format(
+    print('Neg: {: 6d} {: 6d} {: 6d}'.format(
         results['false']['negative'],
         results['false']['unknown'],
         results['false']['positive']))
