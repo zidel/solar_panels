@@ -143,7 +143,7 @@ def get_nib_tile(z, x, y):
             with db.transaction() as cursor:
                 database.add_tile_hash(cursor, z, x, y, tile_hash)
 
-    return flask.redirect(f'/api/tiles/by-hash/{tile_hash}.jpeg', code=302)
+    return flask.redirect(f'/api/tiles/by-hash/{tile_hash}.jpeg', code=307)
 
 
 if __name__ == '__main__':
