@@ -5,7 +5,13 @@ import sqlite3
 class Database(object):
     def __init__(self, path):
         self._db = sqlite3.Connection(path)
-        self._init_database()
+
+        while True:
+            try:
+                self._init_database()
+                break
+            except sqlite3.OperationalError:
+                continue
 
     def _cursor(self):
         c = self._db.cursor()
