@@ -78,18 +78,6 @@ def load_nib_data(path):
     return load_image_from_path(path, 3)
 
 
-def process_prediction(cursor, tile_hash, result, model_version):
-    now = datetime.datetime.now()
-    timestamp = now.isoformat()
-
-    database.write_score(
-            cursor,
-            tile_hash,
-            float(result),
-            model_version,
-            timestamp)
-
-
 def score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
                 batch_size, limit, tiles):
     if not tiles:
@@ -109,6 +97,9 @@ def score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
             num_parallel_calls=tensorflow.data.AUTOTUNE)
     dataset = dataset.batch(batch_size)
 
+    now = datetime.datetime.now()
+    timestamp = now.isoformat()
+
     image_index = 0
     for batch in dataset:
         results = m.predict(batch, batch_size=batch_size)
@@ -117,11 +108,12 @@ def score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
                 with db.transaction() as c:
                     for result in results:
                         tile_data = tiles[image_index]
-                        process_prediction(
+                        database.write_score(
                                 c,
                                 tile_data[0],
-                                result,
-                                model_version)
+                                float(result),
+                                model_version,
+                                timestamp)
                         image_index += 1
                         progress.finished(1, float(result), tile_data[1])
                 break
