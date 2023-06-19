@@ -38,35 +38,48 @@ def load_image_data(tile_data):
     return (nib_data, correct)
 
 
-def apply_rotation(tiles):
-    output = []
+def apply_rotation(tiles, add_up_to=-1):
+    output = list(tiles)
     for tile in tiles:
-        for rotations in range(4):
+        for rotations in range(1, 4):
+            if add_up_to == 0:
+                return output
+
             copy = list(tile)
             copy[2] = str(rotations)
             output.append(tuple(copy))
 
-    return output
-
-
-def apply_horizontal_flips(tiles):
-    output = []
-    for tile in tiles:
-        for left_right in [0, 1]:
-            copy = list(tile)
-            copy[3] = str(left_right)
-            output.append(tuple(copy))
+            add_up_to -= 1
 
     return output
 
 
-def apply_vertical_flips(tiles):
-    output = []
+def apply_horizontal_flips(tiles, add_up_to=-1):
+    output = list(tiles)
     for tile in tiles:
-        for up_down in [0, 1]:
-            copy = list(tile)
-            copy[4] = str(up_down)
-            output.append(tuple(copy))
+        if add_up_to == 0:
+            break
+
+        copy = list(tile)
+        copy[3] = '1'
+        output.append(tuple(copy))
+
+        add_up_to -= 1
+
+    return output
+
+
+def apply_vertical_flips(tiles, add_up_to=-1):
+    output = list(tiles)
+    for tile in tiles:
+        if add_up_to == 0:
+            break
+
+        copy = list(tile)
+        copy[4] = '1'
+        output.append(tuple(copy))
+
+        add_up_to -= 1
 
     return output
 
@@ -84,24 +97,19 @@ def augment_tiles(tiles, background_scale):
     solar = apply_horizontal_flips(solar)
     solar = apply_vertical_flips(solar)
 
-    non_solar_scaling_needed = background_scale * len(solar) / len(non_solar)
-    print('Want to scale background by {:.3f}'.format(
-        non_solar_scaling_needed))
+    print(f'Initially: {len(solar)}S, {len(non_solar)}BG')
+    target_count = int(background_scale * len(solar))
+    print('Want to scale background to {}, {:.3f}'.format(
+        target_count,
+        target_count / len(non_solar)))
 
-    if non_solar_scaling_needed > 2:
-        print('Applying rotations to background tiles')
-        non_solar = apply_rotation(non_solar)
-        non_solar_scaling_needed /= 4
+    non_solar = apply_horizontal_flips(non_solar,
+                                       target_count - len(non_solar))
+    non_solar = apply_rotation(non_solar, target_count - len(non_solar))
+    non_solar = apply_vertical_flips(non_solar, target_count - len(non_solar))
 
-    if non_solar_scaling_needed > 1:
-        print('Applying horizontal flips to background tiles')
-        non_solar = apply_horizontal_flips(non_solar)
-        non_solar_scaling_needed /= 2
-
-    if non_solar_scaling_needed > 1:
-        print('Applying vertical flips to background tiles')
-        non_solar = apply_vertical_flips(non_solar)
-        non_solar_scaling_needed /= 2
+    bg_ratio = len(non_solar) / len(solar)
+    print(f'Result: {len(solar)}S, {len(non_solar)}BG, {bg_ratio}')
 
     return solar + non_solar
 
@@ -115,9 +123,9 @@ def format_tile_data(image_dir, tiles):
         nib_path = tile_to_paths(image_dir, tile_hash)
         result.append((str(nib_path),
                        'true' if has_solar else 'false',
-                       '0',
-                       '0',
-                       '0',
+                       '0',  # Rotate
+                       '0',  # Horizontal flip
+                       '0',  # Vertical flip
                        ))
     return result
 
