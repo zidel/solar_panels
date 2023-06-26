@@ -60,15 +60,29 @@ def print_matrix(matrix):
     all_pred_positive = int(matrix[0][2] + matrix[1][2] + matrix[2][2])
     all_real_positive = int(sum(matrix[2]))
 
+    precision = true_positives / all_pred_positive
+    recall = true_positives / all_real_positive
+    f_score = (2 * precision * recall) / (precision + recall)
+
     print()
-    if all_pred_positive > 0:
-        print('Positive accuracy: {:.0f}%'.format(
-            100 * true_positives / all_pred_positive))
-    else:
-        print('Positive accuracy: N/A ({} / {})'.format(
-            true_positives, all_pred_positive))
+    print('Positive accuracy: {:.0f}%'.format(
+        100 * precision))
     print('Positive coverage: {:.0f}%'.format(
-        100 * true_positives / all_real_positive))
+        100 * recall))
+    print('          F-score: {:.0f}%'.format(
+        100 * f_score))
+
+
+def print_num_positive_in_top(tiles):
+    tiles.sort(key=lambda t: t[2], reverse=True)
+    tiles = tiles[:1000]
+
+    try:
+        num_solar = sum([t[1] for t in tiles])
+        print(f'  Solar in top 1k: {num_solar}')
+    except TypeError:
+        num_missing = sum([1 if t[1] is None else 0 for t in tiles])
+        print(f'Review {num_missing} more tiles to get 1k count')
 
 
 def main():
@@ -128,6 +142,7 @@ def main():
 
     matrix = tensorflow.math.confusion_matrix(labels, predictions)
     print_matrix(matrix)
+    print_num_positive_in_top(tiles)
 
     return 0
 
