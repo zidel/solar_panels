@@ -96,6 +96,9 @@ class Database(object):
         return (tiles, count)
 
     def tiles_for_review(self, limit):
+        only_validation_tiles = False
+        review_most_likely = False
+
         with self.transaction() as c:
             c.execute('''select model_version
                          from scores
@@ -111,21 +114,35 @@ class Database(object):
             if model_version is None:
                 return []
 
-            c.execute('''select tile_hash, z, x, y, score, model_version
-                         from scores
-                         natural left join (
-                            select 1 as t, tile_hash
-                            from with_solar)
-                         natural join tile_positions
-                         where t is null
-                               and score is not null
-                               and model_version = ?
-                         order by score desc
-                         limit ?
-                      ''',
-                      # order by score desc
-                      # order by abs(score - 0.5) asc
-                      (model_version[0], limit))
+            query_condition = ''
+            if only_validation_tiles:
+                query_condition = '''and tile_hash in (
+                                         select tile_hash
+                                         from validation_set)
+                                  '''
+
+            ordering = 'abs(score - 0.5) asc'
+            if review_most_likely:
+                ordering = 'score desc'
+
+            query_fmt = '''select tile_hash, z, x, y, score, model_version
+                           from scores
+                           natural left join (
+                              select 1 as t, tile_hash
+                              from with_solar)
+                           natural join tile_positions
+                           where t is null
+                                 and score is not null
+                                 and model_version = ?
+                                 {}
+                           order by {}
+                           limit ?
+                        '''
+            query = query_fmt.format(
+                    query_condition,
+                    ordering,
+                    )
+            c.execute(query, [model_version[0], limit])
             return c.fetchall()
 
     def tiles_with_solar(self):
