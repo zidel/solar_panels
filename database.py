@@ -142,7 +142,7 @@ class Database(object):
                     query_condition,
                     ordering,
                     )
-            c.execute(query, [model_version[0], limit])
+            c.execute(query, [model_version[0], limit])
             return c.fetchall()
 
     def tiles_with_solar(self):
