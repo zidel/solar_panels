@@ -13,7 +13,7 @@ PYTHON_SRC := \
 	web.py \
 
 
-all : flake8 data/.score.marker data/model_bg0.5.hdf5 data/model_bg2.hdf5 data/model_bg3.hdf5
+all : flake8 data/.score.marker
 flake8 : .flake8.marker
 
 
@@ -29,17 +29,8 @@ data/.download.marker : data/.tiles_from_pop.marker download_tiles.py database.p
 	python3 download_tiles.py
 	touch data/.download.marker
 
-data/model_bg0.5.hdf5 : data/.download.marker train.py Makefile
-	python3 train.py --save-to=data/model_bg0.5.hdf5
-
 data/model_bg1.hdf5 : data/.download.marker train.py Makefile
 	python3 train.py --save-to=data/model_bg1.hdf5
-
-data/model_bg2.hdf5 : data/.download.marker train.py Makefile
-	python3 train.py --save-to=data/model_bg2.hdf5
-
-data/model_bg3.hdf5 : data/.download.marker train.py Makefile
-	python3 train.py --save-to=data/model_bg3.hdf5
 
 data/.score.marker : data/model_bg1.hdf5 Makefile
 	python3 score_tiles.py --load-model=data/model_bg1.hdf5
