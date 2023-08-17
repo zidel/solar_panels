@@ -73,16 +73,16 @@ def print_matrix(matrix):
         100 * f_score))
 
 
-def print_num_positive_in_top(tiles):
+def print_num_positive_in_top(tiles, to_check, prefix):
     tiles.sort(key=lambda t: t[2], reverse=True)
-    tiles = tiles[:1000]
+    tiles = tiles[:to_check]
 
     try:
         num_solar = sum([t[1] for t in tiles])
-        print(f'  Solar in top 1k: {num_solar}')
+        print(f'  {prefix}: {num_solar}')
     except TypeError:
         num_missing = sum([1 if t[1] is None else 0 for t in tiles])
-        print(f'Review {num_missing} more tiles to get 1k count')
+        print(f'  {prefix}: Review {num_missing} more tiles')
 
 
 def main():
@@ -142,7 +142,9 @@ def main():
 
     matrix = tensorflow.math.confusion_matrix(labels, predictions)
     print_matrix(matrix)
-    print_num_positive_in_top(tiles)
+    print_num_positive_in_top(tiles, 100, 'Solar in top 100')
+    print_num_positive_in_top(tiles, 250, 'Solar in top 250')
+    print_num_positive_in_top(tiles, 1000, 'Solar in top 1k')
 
     return 0
 
