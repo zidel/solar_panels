@@ -67,14 +67,18 @@ class Database(object):
                              foreign key (tile_hash) references tile_positions)
                       ''')
             c.execute('''create table if not exists training_set (
-                             tile_hash string not null,
-                             primary key (tile_hash),
-                             foreign key (tile_hash) references with_solar)
+                             z integer not null,
+                             x integer not null,
+                             y integer not null,
+                             primary key (z, x, y),
+                             foreign key (z, x, y) references tile_positions)
                       ''')
             c.execute('''create table if not exists validation_set (
-                             tile_hash string not null,
-                             primary key (tile_hash),
-                             foreign key (tile_hash) references with_solar)
+                             z integer not null,
+                             x integer not null,
+                             y integer not null,
+                             primary key (z, x, y),
+                             foreign key (z, x, y) references tile_positions)
                       ''')
 
     def tiles_for_scoring(self, current_model, limit):
@@ -118,7 +122,8 @@ class Database(object):
             if only_validation_tiles:
                 query_condition = '''and tile_hash in (
                                          select tile_hash
-                                         from validation_set)
+                                         from validation_set
+                                         natural join tile_positions)
                                   '''
 
             ordering = 'abs(score - 0.5) asc'
@@ -308,6 +313,7 @@ def mark_checked(cursor, z, x, y):
 def training_tiles(cursor):
     cursor.execute('''select tile_hash, has_solar, 0
                       from training_set
+                      natural join tile_positions
                       natural join with_solar
                    ''')
     return cursor.fetchall()
@@ -316,6 +322,7 @@ def training_tiles(cursor):
 def validation_tiles(cursor):
     cursor.execute('''select tile_hash, has_solar, score
                       from validation_set
+                      natural join tile_positions
                       natural left join with_solar
                       natural left join scores
                    ''')
@@ -325,37 +332,10 @@ def validation_tiles(cursor):
 def validation_tiles_for_scoring(cursor, current_model):
     cursor.execute('''select tile_hash, score
                       from validation_set
+                      natural join tile_positions
                       natural left join scores
                       where model_version is null
                           or model_version != ?
                    ''',
                    [current_model])
     return cursor.fetchall()
-
-
-def unassigned_tile_hashes(cursor):
-    cursor.execute('''select tile_hash
-                      from with_solar
-                      where tile_hash not in (
-                          select tile_hash
-                          from training_set
-                          natural full join validation_set)
-                   ''')
-    return cursor.fetchall()
-
-
-def assign_to_set(cursor, tile_hash, dataset):
-    assert type(tile_hash) == str
-
-    table_mapping = {
-            'training': 'training_set',
-            'validation': 'validation_set',
-            }
-    assert dataset in table_mapping
-    table_name = table_mapping[dataset]
-
-    cursor.execute(f'''insert into {table_name}
-                       (tile_hash)
-                       values (?)
-                   ''',
-                   [tile_hash])
