@@ -2,14 +2,17 @@ import argparse
 import datetime
 import pathlib
 import sys
+import time
 
+import sqlite3
 import tqdm
 
 import database
 import util
 
 
-recheck_interval = datetime.timedelta(days=180)
+recheck_interval = datetime.timedelta(days=30)
+minimum_image_duration = 10
 
 
 def main():
@@ -38,14 +41,24 @@ def main():
             positions.add((z, x, y))
 
     for z, x, y in tqdm.tqdm(positions):
+        start = time.time()
         written, tile_hash = util.download_single_tile(
                 image_dir, nib_api_key, z, x, y)
-        with db.transaction() as c:
-            if written:
-                database.add_tile_hash(c, z, x, y, tile_hash)
-                new_tiles.update()
 
-            database.mark_checked(c, z, x, y)
+        try:
+            with db.transaction() as c:
+                if written:
+                    database.add_tile_hash(c, z, x, y, tile_hash)
+                    new_tiles.update()
+
+                database.mark_checked(c, z, x, y)
+        except sqlite3.OperationalError:
+            # Ignore it and try again in the next round of downloads
+            new_tiles.write(f'{datetime.datetime.now()}: failed to update database')
+
+        duration = time.time() - start
+        if duration < minimum_image_duration:
+            time.sleep(minimum_image_duration - duration)
 
 
 if __name__ == '__main__':
