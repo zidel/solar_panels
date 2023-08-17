@@ -81,3 +81,9 @@ def download_single_tile(image_dir, nib_api_key, z, x, y):
         time.sleep(0.1 - duration)
 
     return written, full_hash
+
+
+def tile_to_paths(tile_dir, tile_hash):
+    dir_name = tile_hash[:2]
+    file_name = tile_hash[2:]
+    return tile_dir / f'{dir_name}/{file_name}.jpeg'

@@ -7,12 +7,7 @@ import tensorflow as tf
 
 import database
 import model
-
-
-def tile_to_paths(tile_dir, tile_hash):
-    dir_name = tile_hash[:2]
-    file_name = tile_hash[2:]
-    return tile_dir / f'{dir_name}/{file_name}.jpeg'
+import util
 
 
 def read_image(path, channels=3):
@@ -120,7 +115,7 @@ def format_tile_data(image_dir, tiles):
         if has_solar is None:
             continue
 
-        nib_path = tile_to_paths(image_dir, tile_hash)
+        nib_path = util.tile_to_paths(image_dir, tile_hash)
         result.append((str(nib_path),
                        'true' if has_solar else 'false',
                        '0',  # Rotate
