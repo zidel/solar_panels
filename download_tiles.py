@@ -54,7 +54,8 @@ def main():
                 database.mark_checked(c, z, x, y)
         except sqlite3.OperationalError:
             # Ignore it and try again in the next round of downloads
-            new_tiles.write(f'{datetime.datetime.now()}: failed to update database')
+            new_tiles.write('{}: failed to update database'.format(
+                datetime.datetime.now()))
 
         duration = time.time() - start
         if duration < minimum_image_duration:
