@@ -103,32 +103,38 @@ class Database(object):
         only_validation_tiles = False
         review_most_likely = False
 
+        query_condition = ''
+        if only_validation_tiles:
+            query_condition = '''and tile_hash in (
+                                     select tile_hash
+                                     from validation_set
+                                     natural join tile_positions)
+                              '''
+
+        ordering = 'abs(score - 0.5) asc'
+        if review_most_likely:
+            ordering = 'score desc'
+
         with self.transaction() as c:
-            c.execute('''select model_version
-                         from scores
-                         where timestamp in (
-                             select max(timestamp)
-                             from scores
-                             natural left join (
-                                 select 1 as t, tile_hash
-                                 from with_solar)
-                             where t is null)
-                      ''')
+            model_fmt = '''select model_version
+                           from scores
+                           where timestamp in (
+                               select max(timestamp)
+                               from scores
+                               natural left join (
+                                   select 1 as t, tile_hash
+                                   from with_solar)
+                               where t is null
+                               {}
+                               )
+                        '''
+            model_query = model_fmt.format(
+                    query_condition)
+
+            c.execute(model_query)
             model_version = c.fetchone()
             if model_version is None:
                 return []
-
-            query_condition = ''
-            if only_validation_tiles:
-                query_condition = '''and tile_hash in (
-                                         select tile_hash
-                                         from validation_set
-                                         natural join tile_positions)
-                                  '''
-
-            ordering = 'abs(score - 0.5) asc'
-            if review_most_likely:
-                ordering = 'score desc'
 
             query_fmt = '''select tile_hash, z, x, y, score, model_version
                            from scores
