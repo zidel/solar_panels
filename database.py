@@ -71,14 +71,14 @@ class Database(object):
                              x integer not null,
                              y integer not null,
                              primary key (z, x, y),
-                             foreign key (z, x, y) references tile_positions)
+                             foreign key (z, x, y) references last_update)
                       ''')
             c.execute('''create table if not exists validation_set (
                              z integer not null,
                              x integer not null,
                              y integer not null,
                              primary key (z, x, y),
-                             foreign key (z, x, y) references tile_positions)
+                             foreign key (z, x, y) references last_update)
                       ''')
 
     def tiles_for_scoring(self, current_model, limit):
