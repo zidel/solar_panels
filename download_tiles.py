@@ -87,18 +87,23 @@ def main():
     new_tiles = tqdm.tqdm(desc='New')
     downloads = tqdm.tqdm(desc='Checks', total=len(positions))
 
+    already_downloaded = set()
     while positions:
         start = time.time()
 
         z, x, y = positions.pop()
         new_tile = download_location(db, image_dir, nib_api_key, z, x, y)
         downloads.update()
+        already_downloaded.add((z, x, y))
 
         if new_tile:
             new_tiles.update()
 
             for z_new, x_new, y_new in neighbours(z, x, y):
                 position = (z_new, x_new, y_new)
+                if position in already_downloaded:
+                    continue
+
                 downloads.total += 1
                 positions.append(position)
 
