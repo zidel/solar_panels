@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import enum
 import pathlib
 import random
 import sys
@@ -18,42 +17,24 @@ recheck_interval = datetime.timedelta(days=30)
 minimum_image_duration = 10
 
 
-@enum.unique
-class DownloadResult(enum.Enum):
-    NEW_TILE = enum.auto()
-    KNOWN_TILE = enum.auto()
-    RECENTLY_CHECKED = enum.auto()
-    UNKNOWN_POSITION = enum.auto()
-    DOWNLOAD_ERROR = enum.auto()
-    DATABASE_ERROR = enum.auto()
-
-    def server_contacted(self):
-        return self in [
-                self.NEW_TILE,
-                self.KNOWN_TILE,
-                self.DOWNLOAD_ERROR,
-                self.DATABASE_ERROR,
-                ]
-
-
 def download_location(db, image_dir, nib_api_key, z, x, y):
     with db.transaction() as c:
         timestamp = database.last_checked(c, z, x, y)
         if timestamp is not None:
             delta = datetime.datetime.now() - timestamp
             if delta < recheck_interval:
-                return DownloadResult.RECENTLY_CHECKED
+                return False
         else:
             # We only want to try to download if we have seen this position
             # before, this is not the place to add new positions
             if not database.get_tile_hash(c, z, x, y):
-                return DownloadResult.UNKNOWN_POSITION
+                return False
 
     try:
         written, tile_hash = util.download_single_tile(
                 image_dir, nib_api_key, z, x, y, retry=False)
     except requests.exceptions.ConnectionError:
-        return DownloadResult.DOWNLOAD_ERROR
+        return False
 
     try:
         with db.transaction() as c:
@@ -63,9 +44,9 @@ def download_location(db, image_dir, nib_api_key, z, x, y):
             database.mark_checked(c, z, x, y)
     except sqlite3.OperationalError:
         # Ignore it and try again in the next round of downloads
-        return DownloadResult.DATABASE_ERROR
+        return False
 
-    return DownloadResult.NEW_TILE if written else DownloadResult.KNOWN_TILE
+    return written
 
 
 def neighbours(z, x, y):
@@ -100,10 +81,10 @@ def main():
         start = time.time()
 
         z, x, y = positions.pop()
-        download_result = download_location(db, image_dir, nib_api_key, z, x, y)
+        new_tile = download_location(db, image_dir, nib_api_key, z, x, y)
         downloads.update()
 
-        if download_result == DownloadResult.NEW_TILE:
+        if new_tile:
             new_tiles.update()
 
             for z_new, x_new, y_new in neighbours(z, x, y):
@@ -111,10 +92,9 @@ def main():
                 downloads.total += 1
                 positions.append(position)
 
-        if download_result.server_contacted():
-            duration = time.time() - start
-            if duration < minimum_image_duration:
-                time.sleep(minimum_image_duration - duration)
+        duration = time.time() - start
+        if duration < minimum_image_duration:
+            time.sleep(minimum_image_duration - duration)
 
 
 if __name__ == '__main__':
