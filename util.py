@@ -46,15 +46,21 @@ def nib_url(z, x, y, key):
     return fmt.format(z, x, y, key)
 
 
-def download_single_tile(image_dir, nib_api_key, z, x, y):
+def download_single_tile(image_dir, nib_api_key, z, x, y, retry=True):
     while True:
         try:
             r = requests.get(nib_url(z, x, y, nib_api_key))
         except requests.exceptions.ConnectionError:
+            if not retry:
+                raise
+
             time.sleep(60)
             continue
 
-        if r.status_code != 200:
+        if not r.ok:
+            if not retry:
+                r.raise_for_status()
+
             time.sleep(60)
             continue
 
