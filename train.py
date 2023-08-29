@@ -133,6 +133,7 @@ def main():
     parser.add_argument('--load-model', type=str)
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
     parser.add_argument('--tensorboard', type=str, default=None)
+    parser.add_argument('--feature', default='solar', type=str)
 
     parser.add_argument('--batch-size', default=256, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
@@ -144,10 +145,12 @@ def main():
 
     db = database.Database(args.database)
     with db.transaction() as c:
-        training_tiles = format_tile_data(image_dir,
-                                          database.training_tiles(c))
-        validation_tiles = format_tile_data(image_dir,
-                                            database.validation_tiles(c))
+        training_tiles = format_tile_data(
+                image_dir,
+                database.training_tiles(c, args.feature))
+        validation_tiles = format_tile_data(
+                image_dir,
+                database.validation_tiles(c, args.feature))
 
     training_tiles = augment_tiles(training_tiles, args.background_scale)
     print('Training with {} tiles, validating with {}'.format(

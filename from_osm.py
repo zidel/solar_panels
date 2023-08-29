@@ -7,6 +7,7 @@ import sqlite3
 
 import tqdm
 
+import feature
 import database
 import util
 
@@ -22,15 +23,8 @@ def run_overpass_query(query):
     return request.text
 
 
-def get_points_from_overpass():
-    result = run_overpass_query(
-    '''[out:json][timeout:25];
-       area(id:3602978650)->.searchArea;
-       way["power"="generator"]
-          ["generator:type"="solar_photovoltaic_panel"]
-          (area.searchArea);
-       out ids center qt; >; out skel qt;
-    ''')
+def get_points_from_overpass(feature_name):
+    result = run_overpass_query(feature.overpass_query(feature_name))
     data = json.loads(result)
 
     points = []
@@ -53,13 +47,14 @@ def main():
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--zoom', type=int, default=18)
     parser.add_argument('--tile-path', type=str, default='data/images')
+    parser.add_argument('--feature', type=str, default='solar')
     args = parser.parse_args()
 
     db = database.Database(args.database)
     nib_api_key = util.load_key(args.NiB_key)
     image_dir = pathlib.Path(args.tile_path)
 
-    for point in tqdm.tqdm(get_points_from_overpass()):
+    for point in tqdm.tqdm(get_points_from_overpass(args.feature)):
         xtile, ytile = util.deg2tile(point['lat'], point['lon'], args.zoom)
 
         have_tiles = False
@@ -79,8 +74,10 @@ def main():
                     now = datetime.datetime.now()
                     timestamp = now.isoformat()
                     for tile_hash in database.get_tile_hash(c, args.zoom, xtile, ytile):
-                        database.write_score(c, tile_hash, 1.0, 'OSM', timestamp)
-            except sqlite3.OperationalError:
+                        database.write_score(c, tile_hash, args.feature, 1.0,
+                                             'OSM', timestamp)
+            except sqlite3.OperationalError as e:
+                print(e)
                 continue
             break
 

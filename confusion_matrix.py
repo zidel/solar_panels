@@ -93,6 +93,7 @@ def main():
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--tile-path', type=str, default="data/images")
     parser.add_argument('--batch-size', default=10, type=int)
+    parser.add_argument('--feature', default='solar', type=str)
     args = parser.parse_args()
 
     db = database.Database(args.database)
@@ -102,7 +103,7 @@ def main():
 
     with db.transaction() as c:
         tiles_for_scoring = database.validation_tiles_for_scoring(
-                c, model_version)
+                c, model_version, args.feature)
 
     progress = score_tiles.Progress()
     progress.remaining(len(tiles_for_scoring))
@@ -111,6 +112,7 @@ def main():
                 db,
                 image_dir,
                 nib_api_key,
+                args.feature,
                 progress,
                 model.get(args.model, args.load_model),
                 model_version,
@@ -121,7 +123,7 @@ def main():
         progress.clear()
 
     with db.transaction() as c:
-        tiles = database.validation_tiles(c)
+        tiles = database.validation_tiles(c, args.feature)
 
     labels = []
     predictions = []
@@ -142,9 +144,9 @@ def main():
 
     matrix = tensorflow.math.confusion_matrix(labels, predictions)
     print_matrix(matrix)
-    print_num_positive_in_top(tiles, 100, 'Solar in top 100')
-    print_num_positive_in_top(tiles, 250, 'Solar in top 250')
-    print_num_positive_in_top(tiles, 1000, 'Solar in top 1k')
+    print_num_positive_in_top(tiles, 100, 'Feature in top 100')
+    print_num_positive_in_top(tiles, 250, 'Feature in top 250')
+    print_num_positive_in_top(tiles, 1000, 'Feature in top 1k')
 
     return 0
 

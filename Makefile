@@ -30,10 +30,14 @@ data/.download.marker : data/.tiles_from_pop.marker download_tiles.py database.p
 	touch data/.download.marker
 
 data/model_bg1.hdf5 : data/.download.marker train.py Makefile
-	python3 train.py --save-to=data/model_bg1.hdf5
+	python3 train.py --save-to=data/model_bg1.hdf5 --feature=solar
 
-data/.score.marker : data/model_bg1.hdf5 Makefile
+data/playground.hdf5 : data/.download.marker train.py Makefile
+	python3 train.py --save-to=data/playground.hdf5 --feature=playground
+
+data/.score.marker : data/model_bg1.hdf5 data/playground.hdf5 Makefile
 	python3 score_tiles.py --load-model=data/model_bg1.hdf5
+	python3 score_tiles.py --load-model=data/playground.hdf5 --feature=playground
 	touch data/.score.marker
 
 

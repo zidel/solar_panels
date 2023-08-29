@@ -78,8 +78,8 @@ def load_nib_data(path):
     return load_image_from_path(path, 3)
 
 
-def score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
-                batch_size, limit, tiles):
+def score_tiles(db, image_dir, nib_api_key, feature_name, progress, m,
+                model_version, batch_size, limit, tiles):
     if not tiles:
         return
 
@@ -111,6 +111,7 @@ def score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
                         database.write_score(
                                 c,
                                 tile_data[0],
+                                feature_name,
                                 float(result),
                                 model_version,
                                 timestamp)
@@ -133,6 +134,7 @@ def main():
     parser.add_argument('--model', default='VGG19')
     parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--limit', type=int)
+    parser.add_argument('--feature', type=str, default='solar')
 
     parser.add_argument('--batch-size', default=10, type=int)
     args = parser.parse_args()
@@ -147,13 +149,14 @@ def main():
     progress = Progress()
     try:
         while True:
-            tiles, count = db.tiles_for_scoring(model_version, 1000000)
+            tiles, count = db.tiles_for_scoring(model_version, args.feature,
+                                                1000000)
             if not tiles:
                 break
 
             progress.remaining(count)
-            score_tiles(db, image_dir, nib_api_key, progress, m, model_version,
-                        args.batch_size, args.limit, tiles)
+            score_tiles(db, image_dir, nib_api_key, args.feature, progress, m,
+                        model_version, args.batch_size, args.limit, tiles)
     finally:
         progress.clear()
         print('Scored {} tiles'.format(progress.done))

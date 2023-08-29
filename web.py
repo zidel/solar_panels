@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import pathlib
 import random
@@ -9,9 +10,10 @@ import database
 import util
 
 
-db_path = pathlib.Path('data/tiles.db')
-nib_key_path = pathlib.Path('secret/NiB_key.json')
-tile_path = pathlib.Path('data/images')
+db_path = None
+nib_key_path = None
+tile_path = None
+feature = None
 
 
 app = flask.Flask(__name__, static_url_path='')
@@ -30,7 +32,7 @@ def send_script():
 @app.route('/api/review/next_tile')
 def get_next_tile_for_review():
     db = database.Database(db_path)
-    tiles = db.tiles_for_review(limit=1)
+    tiles = db.tiles_for_review(feature, limit=1)
     if not tiles:
         return '', 204
 
@@ -64,6 +66,7 @@ def score_neighbours(cursor, own_hash):
                                                          neighbour_y):
                 database.write_score(cursor,
                                      neighbour_hash,
+                                     feature,
                                      1.0,
                                      'neighbour',
                                      now)
@@ -76,21 +79,21 @@ def accept_tile_response():
     response = body['response']
 
     if response == 'true':
-        has_solar = True
+        has_feature = True
     elif response == 'false':
-        has_solar = False
+        has_feature = False
     elif response == 'skip':
-        has_solar = None
+        has_feature = None
     else:
         return 400, 'Bad "response" value'
 
     db = database.Database(db_path)
     try:
-        if has_solar is not None:
+        if has_feature is not None:
             with db.transaction() as c:
-                database.set_has_solar(c, tile_hash, has_solar)
+                database.set_has_feature(c, tile_hash, feature, has_feature)
         else:
-            db.remove_score(tile_hash)
+            db.remove_score(feature, tile_hash)
     except sqlite3.IntegrityError as e:
         print(e)
 
@@ -147,4 +150,16 @@ def get_nib_tile(z, x, y):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--NiB-key', type=str, default='secret/NiB_key.json')
+    parser.add_argument('--tile-path', type=str, default='data/images')
+    parser.add_argument('--feature', default='solar', type=str)
+    args = parser.parse_args()
+
+    db_path = pathlib.Path(args.database)
+    nib_key_path = pathlib.Path(args.NiB_key)
+    tile_path = pathlib.Path(args.tile_path)
+    feature = args.feature
+
     app.run('0.0.0.0', 5000)

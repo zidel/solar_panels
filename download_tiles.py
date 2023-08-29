@@ -14,7 +14,7 @@ import util
 
 
 recheck_interval = datetime.timedelta(days=30)
-minimum_image_duration = 10
+minimum_image_duration = 0.1
 
 
 def download_location(db, image_dir, nib_api_key, z, x, y):
