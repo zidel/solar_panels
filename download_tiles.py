@@ -70,8 +70,18 @@ def main():
     nib_api_key = util.load_key(args.NiB_key)
     image_dir = pathlib.Path(args.tile_path)
 
+    positions = []
     with db.transaction() as c:
-        positions = database.all_tiles(c)
+        now = datetime.datetime.now()
+        for z, x, y in database.all_tiles(c):
+            timestamp = database.last_checked(c, z, x, y)
+            if timestamp is not None:
+                delta = now - timestamp
+                if delta < recheck_interval:
+                    continue
+
+            positions.append((z, x, y))
+
     random.shuffle(positions)
 
     new_tiles = tqdm.tqdm(desc='New')
