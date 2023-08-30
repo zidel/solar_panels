@@ -134,14 +134,16 @@ class Database(object):
                                    natural left join (
                                        select 1 as t, tile_hash
                                        from has_feature)
-                                   where t is null
+                                   where
+                                       t is null
+                                       and feature_name = ?
                                    {}
                                )
                         '''
             model_query = model_fmt.format(
                     query_condition)
 
-            c.execute(model_query, [feature_name])
+            c.execute(model_query, [feature_name, feature_name])
             model_version = c.fetchone()
             if model_version is None:
                 return []
