@@ -133,7 +133,8 @@ class Database(object):
                                    from scores
                                    natural left join (
                                        select 1 as t, tile_hash
-                                       from has_feature)
+                                       from has_feature
+                                       where feature_name = ?)
                                    where
                                        t is null
                                        and feature_name = ?
@@ -143,7 +144,7 @@ class Database(object):
             model_query = model_fmt.format(
                     query_condition)
 
-            c.execute(model_query, [feature_name, feature_name])
+            c.execute(model_query, [feature_name, feature_name, feature_name])
             model_version = c.fetchone()
             if model_version is None:
                 return []
@@ -152,7 +153,8 @@ class Database(object):
                            from scores
                            natural left join (
                               select 1 as t, tile_hash
-                              from has_feature)
+                              from has_feature
+                              where feature_name = ?)
                            natural join tile_positions
                            where t is null
                                  and feature_name = ?
@@ -166,7 +168,7 @@ class Database(object):
                     query_condition,
                     ordering,
                     )
-            c.execute(query, [feature_name, model_version[0], limit])
+            c.execute(query, [feature_name, feature_name, model_version[0], limit])
             return c.fetchall()
 
     def tiles_with_solar(self):
