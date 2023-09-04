@@ -13,7 +13,7 @@ import database
 import util
 
 
-recheck_interval = datetime.timedelta(days=30)
+recheck_interval = datetime.timedelta(days=90)
 minimum_image_duration = 0.1
 
 
