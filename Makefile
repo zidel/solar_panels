@@ -13,7 +13,7 @@ PYTHON_SRC := \
 	web.py \
 
 
-all : flake8 data/.score.marker
+all : flake8 data/.score_solar.marker data/.score_playground.marker
 flake8 : .flake8.marker
 
 
@@ -35,12 +35,15 @@ data/solar.hdf5 : data/.download.marker train.py Makefile
 data/playground.hdf5 : data/.download.marker train.py Makefile
 	python3 train.py --save-to=data/playground.hdf5 --feature=playground
 
-data/.score.marker : data/solar.hdf5 data/playground.hdf5 Makefile
+data/.score_solar.marker : data/solar.hdf5 data/playground.hdf5 Makefile
 	python3 confusion_matrix.py --load-model=data/solar.hdf5 --feature=solar
-	python3 confusion_matrix.py --load-model=data/playground.hdf5 --feature=playground
 	python3 score_tiles.py --load-model=data/solar.hdf5
+	touch data/.score_solar.marker
+
+data/.score_playground.marker : data/solar.hdf5 data/playground.hdf5 Makefile
+	python3 confusion_matrix.py --load-model=data/playground.hdf5 --feature=playground
 	python3 score_tiles.py --load-model=data/playground.hdf5 --feature=playground
-	touch data/.score.marker
+	touch data/.score_playground.marker
 
 
 web :
@@ -50,7 +53,8 @@ web :
 clean :
 	$(RM) .flake8.marker
 	$(RM) data/.download.marker
-	$(RM) data/.score.marker
+	$(RM) data/.score_solar.marker
+	$(RM) data/.score_playground.marker
 
 distclean : clean
 	$(RM) -r data/solar.hdf5
