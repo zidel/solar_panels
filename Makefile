@@ -29,16 +29,16 @@ data/.download.marker : data/.tiles_from_pop.marker download_tiles.py database.p
 	python3 download_tiles.py
 	touch data/.download.marker
 
-data/model_bg1.hdf5 : data/.download.marker train.py Makefile
-	python3 train.py --save-to=data/model_bg1.hdf5 --feature=solar
+data/solar.hdf5 : data/.download.marker train.py Makefile
+	python3 train.py --save-to=data/solar.hdf5 --feature=solar
 
 data/playground.hdf5 : data/.download.marker train.py Makefile
 	python3 train.py --save-to=data/playground.hdf5 --feature=playground
 
-data/.score.marker : data/model_bg1.hdf5 data/playground.hdf5 Makefile
-	python3 confusion_matrix.py --load-model=data/model_bg1.hdf5 --feature=solar
+data/.score.marker : data/solar.hdf5 data/playground.hdf5 Makefile
+	python3 confusion_matrix.py --load-model=data/solar.hdf5 --feature=solar
 	python3 confusion_matrix.py --load-model=data/playground.hdf5 --feature=playground
-	python3 score_tiles.py --load-model=data/model_bg1.hdf5
+	python3 score_tiles.py --load-model=data/solar.hdf5
 	python3 score_tiles.py --load-model=data/playground.hdf5 --feature=playground
 	touch data/.score.marker
 
@@ -53,8 +53,5 @@ clean :
 	$(RM) data/.score.marker
 
 distclean : clean
-	$(RM) -r data/model_bg0.5.hdf5
-	$(RM) -r data/model_bg1.hdf5
-	$(RM) -r data/model_bg2.hdf5
-	$(RM) -r data/model_bg3.hdf5
-	$(RM) -r data/model.hdf5
+	$(RM) -r data/solar.hdf5
+	$(RM) -r data/playground.hdf5
