@@ -155,7 +155,10 @@ class Database(object):
             query = query_fmt.format(
                     ordering,
                     )
-            c.execute(query, [feature_name, feature_name, model_version[0], limit])
+            c.execute(query, [feature_name,
+                              feature_name,
+                              model_version[0],
+                              limit])
             return c.fetchall()
 
     def tiles_with_solar(self):
