@@ -108,41 +108,30 @@ class Database(object):
         return (tiles, count)
 
     def tiles_for_review(self, feature_name, limit):
-        only_validation_tiles = False
         review_most_likely = True
-
-        query_condition = ''
-        if only_validation_tiles:
-            query_condition = '''and tile_hash in (
-                                     select tile_hash
-                                     from validation_set
-                                     natural join tile_positions)
-                              '''
 
         ordering = 'abs(score - 0.5) asc'
         if review_most_likely:
             ordering = 'score desc'
 
         with self.transaction() as c:
-            model_fmt = '''select model_version
-                           from scores
-                           where
-                               feature_name = ?
-                               and timestamp in (
-                                   select max(timestamp)
-                                   from scores
-                                   natural left join (
-                                       select 1 as t, tile_hash
-                                       from has_feature
-                                       where feature_name = ?)
-                                   where
-                                       t is null
-                                       and feature_name = ?
-                                   {}
-                               )
-                        '''
-            model_query = model_fmt.format(
-                    query_condition)
+            model_query = '''select model_version
+                             from scores
+                             where
+                                 feature_name = ?
+                                 and timestamp in (
+                                     select max(timestamp)
+                                     from scores
+                                     natural left join (
+                                         select 1 as t, tile_hash
+                                         from has_feature
+                                         where feature_name = ?)
+                                     where
+                                         t is null
+                                         and feature_name = ?
+                                 )
+                             limit 1
+                          '''
 
             c.execute(model_query, [feature_name, feature_name, feature_name])
             model_version = c.fetchone()
@@ -160,12 +149,10 @@ class Database(object):
                                  and feature_name = ?
                                  and score is not null
                                  and model_version = ?
-                                 {}
                            order by {}
                            limit ?
                         '''
             query = query_fmt.format(
-                    query_condition,
                     ordering,
                     )
             c.execute(query, [feature_name, feature_name, model_version[0], limit])
