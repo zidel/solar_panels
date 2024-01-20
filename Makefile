@@ -30,19 +30,19 @@ data/.download.marker : data/.tiles_from_pop.marker download_tiles.py database.p
 	touch data/.download.marker
 
 data/solar.hdf5 : data/.download.marker train.py Makefile
-	python3 train.py --save-to=data/solar.hdf5 --feature=solar
+	./in_container.sh python3 train.py --save-to=data/solar.hdf5 --feature=solar
 
 data/playground.hdf5 : data/.download.marker train.py Makefile
-	python3 train.py --save-to=data/playground.hdf5 --feature=playground
+	./in_container.sh python3 train.py --save-to=data/playground.hdf5 --feature=playground
 
 data/.score_solar.marker : data/solar.hdf5 Makefile
-	python3 confusion_matrix.py --load-model=data/solar.hdf5 --feature=solar
-	python3 score_tiles.py --load-model=data/solar.hdf5
+	./in_container.sh python3 confusion_matrix.py --load-model=data/solar.hdf5 --feature=solar
+	./in_container.sh python3 score_tiles.py --load-model=data/solar.hdf5
 	touch data/.score_solar.marker
 
 data/.score_playground.marker : data/playground.hdf5 Makefile
-	python3 confusion_matrix.py --load-model=data/playground.hdf5 --feature=playground
-	python3 score_tiles.py --load-model=data/playground.hdf5 --feature=playground
+	./in_container.sh python3 confusion_matrix.py --load-model=data/playground.hdf5 --feature=playground
+	./in_container.sh python3 score_tiles.py --load-model=data/playground.hdf5 --feature=playground
 	touch data/.score_playground.marker
 
 
