@@ -88,16 +88,19 @@ class Database(object):
     def tiles_for_scoring(self, current_model, feature_name, limit):
         query_fmt = '''select {}
                        from tile_positions
-                       natural left join scores
+                       natural left join (
+                           select tile_hash, score, model_version
+                           from scores
+                           where feature_name = ?
+                           )
                        where
                            model_version is null
-                           or (model_version != ?
-                               and feature_name = ?)
+                           or model_version != ?
                        {}
                     '''
         with self.transaction() as c:
             c.execute(query_fmt.format('count(*)', ''),
-                      [current_model, feature_name])
+                      [feature_name, current_model])
             count = c.fetchone()[0]
 
             c.execute(query_fmt.format('tile_hash, score',
