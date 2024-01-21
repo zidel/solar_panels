@@ -37,7 +37,7 @@ data/playground.hdf5 : data/.download.marker train.py Makefile
 
 data/.score_solar.marker : data/solar.hdf5 Makefile
 	./in_container.sh python3 confusion_matrix.py --load-model=data/solar.hdf5 --feature=solar
-	./in_container.sh python3 score_tiles.py --load-model=data/solar.hdf5
+	./in_container.sh python3 score_tiles.py --load-model=data/solar.hdf5 --feature=solar
 	touch data/.score_solar.marker
 
 data/.score_playground.marker : data/playground.hdf5 Makefile
