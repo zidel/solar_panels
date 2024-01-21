@@ -134,7 +134,7 @@ def main():
     parser.add_argument('--model', default='VGG19')
     parser.add_argument('--load-model', default='data/model.hdf5')
     parser.add_argument('--limit', type=int)
-    parser.add_argument('--feature', type=str, default='solar')
+    parser.add_argument('--feature', type=str, required=True)
 
     parser.add_argument('--batch-size', default=10, type=int)
     args = parser.parse_args()

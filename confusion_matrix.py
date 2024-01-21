@@ -93,7 +93,7 @@ def main():
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--tile-path', type=str, default="data/images")
     parser.add_argument('--batch-size', default=10, type=int)
-    parser.add_argument('--feature', default='solar', type=str)
+    parser.add_argument('--feature', type=str, required=True)
     args = parser.parse_args()
 
     db = database.Database(args.database)

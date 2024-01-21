@@ -154,7 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--NiB-key', type=str, default='secret/NiB_key.json')
     parser.add_argument('--tile-path', type=str, default='data/images')
-    parser.add_argument('--feature', default='solar', type=str)
+    parser.add_argument('--feature', type=str, required=True)
     args = parser.parse_args()
 
     db_path = pathlib.Path(args.database)

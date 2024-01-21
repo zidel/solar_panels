@@ -133,7 +133,7 @@ def main():
     parser.add_argument('--load-model', type=str)
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
     parser.add_argument('--tensorboard', type=str, default=None)
-    parser.add_argument('--feature', default='solar', type=str)
+    parser.add_argument('--feature', type=str, required=True)
 
     parser.add_argument('--batch-size', default=256, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
