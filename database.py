@@ -105,7 +105,7 @@ class Database(object):
 
             c.execute(query_fmt.format('tile_hash, score',
                                        'order by score desc limit ?'),
-                      [current_model, feature_name, limit])
+                      [feature_name, current_model, limit])
             tiles = c.fetchall()
 
         return (tiles, count)
