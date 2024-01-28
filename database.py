@@ -49,6 +49,7 @@ class Database(object):
                              z integer not null,
                              x integer not null,
                              y integer not null,
+                             added string not null,
                              primary key (tile_hash),
                              foreign key (z, x, y) references last_update)
                       ''')
@@ -245,12 +246,15 @@ def add_tile_hash(cursor, z, x, y, tile_hash):
     assert type(tile_hash) == str
 
     add_tile(cursor, z, x, y)
+
+    now = datetime.datetime.now()
+    timestamp = now.isoformat()
     cursor.execute('''insert into tile_positions
-                      (tile_hash, z, x, y)
-                      values (?, ?, ?, ?)
+                      (tile_hash, z, x, y, added)
+                      values (?, ?, ?, ?, ?)
                       on conflict do nothing
                    ''',
-                   (tile_hash, z, x, y))
+                   (tile_hash, z, x, y, timestamp))
 
 
 def write_score(cursor, tile_hash, feature_name, score, model_version,
