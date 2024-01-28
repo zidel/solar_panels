@@ -125,6 +125,8 @@ def main():
     with db.transaction() as c:
         tiles = database.validation_tiles(c, args.feature)
 
+    tiles = [tile for tile in tiles if tile[2] is not None]
+
     labels = []
     predictions = []
     for _, has_solar, score in tiles:
