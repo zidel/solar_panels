@@ -88,14 +88,20 @@ def accept_tile_response():
         return 400, 'Bad "response" value'
 
     db = database.Database(db_path)
-    try:
-        if has_feature is not None:
-            with db.transaction() as c:
-                database.set_has_feature(c, tile_hash, feature, has_feature)
-        else:
-            db.remove_score(feature, tile_hash)
-    except sqlite3.IntegrityError as e:
-        print(e)
+    while True:
+        try:
+            if has_feature is not None:
+                with db.transaction() as c:
+                    database.set_has_feature(c, tile_hash, feature, has_feature)
+            else:
+                db.remove_score(feature, tile_hash)
+            break
+        except sqlite3.IntegrityError as e:
+            print(e)
+            break
+        except sqlite3.OperationalError as e:
+            print(e)
+            continue
 
     return {}
 
