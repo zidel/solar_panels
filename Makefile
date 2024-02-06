@@ -1,4 +1,4 @@
-.PHONY : all flake8 web clean distclean compare_models
+.PHONY : all flake8 web clean distclean compare_models test
 
 
 PYTHON_SRC := \
@@ -13,8 +13,12 @@ PYTHON_SRC := \
 	web.py \
 
 
-all : flake8 data/.score_solar.marker data/.score_playground.marker
+all : flake8 test data/.score_solar.marker data/.score_playground.marker
 flake8 : .flake8.marker
+
+
+test :
+	python3 -m unittest
 
 
 .flake8.marker : $(PYTHON_SRC) Makefile
