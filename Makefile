@@ -2,11 +2,18 @@
 
 
 PYTHON_SRC := \
+	assign_to_sets.py \
+	confusion_matrix.py \
 	database.py \
 	download_tiles.py \
-	import_tiles_by_population.py \
+	feature.py \
+	from_osm.py \
+	fsck.py \
 	model.py \
+	random_scores.py \
 	score_tiles.py \
+	test/__init__.py \
+	test/test_util.py \
 	to_gpx.py \
 	train.py \
 	util.py \
