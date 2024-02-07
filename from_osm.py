@@ -30,10 +30,12 @@ def get_points_from_overpass(feature_name):
     points = []
     for element in data['elements']:
         if 'center' in element:
-            # {'type': 'way', 'id': 1023439043, 'center': {'lat': 59.9195945, 'lon': 10.632018}}
+            # {'type': 'way', 'id': 1023439043,
+            #  'center': {'lat': 59.9195945, 'lon': 10.632018}}
             points.append(element['center'])
         elif 'lat' in element and 'lon' in element:
-            # {'type': 'node', 'id': 9439577222, 'lat': 59.9362591, 'lon': 10.9199213}
+            # {'type': 'node', 'id': 9439577222,
+            #  'lat': 59.9362591, 'lon': 10.9199213}
             points.append({'lat': element['lat'], 'lon': element['lon']})
         else:
             raise RuntimeError(str(element))
@@ -73,7 +75,8 @@ def main():
                 with db.transaction() as c:
                     now = datetime.datetime.now()
                     timestamp = now.isoformat()
-                    for tile_hash in database.get_tile_hash(c, args.zoom, xtile, ytile):
+                    for tile_hash in database.get_tile_hash(
+                            c, args.zoom, xtile, ytile):
                         database.write_score(c, tile_hash, args.feature, 1.0,
                                              'OSM', timestamp)
             except sqlite3.OperationalError as e:

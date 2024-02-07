@@ -4,6 +4,7 @@ _known_features = [
         'large_solar',
         ]
 
+
 def overpass_query(feature):
     assert feature in _known_features
 

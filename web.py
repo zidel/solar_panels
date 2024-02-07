@@ -92,7 +92,8 @@ def accept_tile_response():
         try:
             if has_feature is not None:
                 with db.transaction() as c:
-                    database.set_has_feature(c, tile_hash, feature, has_feature)
+                    database.set_has_feature(c, tile_hash, feature,
+                                             has_feature)
             else:
                 db.remove_score(feature, tile_hash)
             break

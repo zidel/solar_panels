@@ -2,7 +2,7 @@ import argparse
 import pathlib
 import os
 
-import tqdm
+import sqlite3
 
 import database
 import util
@@ -10,8 +10,6 @@ import util
 
 def check_variants_of_validation_tiles_not_in_training_set(db):
     print('Checking for tiles that should be in the validation set')
-    validation_hashes = set()
-    validation_positions = set()
 
     failure_count = 0
     with db.transaction() as c:

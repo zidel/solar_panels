@@ -15,7 +15,8 @@ def main():
     timestamp = now.isoformat()
     with db.transaction() as c:
         for tile_hash, in database.all_tile_hashes(c):
-            database.write_score(c, tile_hash, random.random(), 'random', timestamp)
+            database.write_score(c, tile_hash, random.random(),
+                                 'random', timestamp)
 
 
 if __name__ == '__main__':

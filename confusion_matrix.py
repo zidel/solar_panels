@@ -13,8 +13,9 @@ import util
 def load_image_from_path(input_path, channels):
     input_data = tensorflow.io.read_file(input_path)
     input_data = tensorflow.io.decode_jpeg(input_data, channels=channels)
-    input_data = tensorflow.cast(input_data, tensorflow.float32)# / 255.0
-    input_data = tensorflow.keras.applications.vgg19.preprocess_input(input_data)
+    input_data = tensorflow.cast(input_data, tensorflow.float32)
+    input_data = tensorflow.keras.applications.vgg19.preprocess_input(
+            input_data)
     return input_data
 
 
@@ -23,7 +24,6 @@ def load_nib_data(path):
 
 
 def print_matrix(matrix):
-    total = int(sum(sum(matrix)))
     results = {
             'false': {
                 'negative': int(matrix[0][0]),
