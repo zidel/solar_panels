@@ -2,6 +2,7 @@ _known_features = [
         'playground',
         'solar',
         'large_solar',
+        'solar_area',
         ]
 
 
@@ -31,4 +32,17 @@ def overpass_query(feature):
                      (if: length() > 100)
                      (area.searchArea);
                   out ids center qt; >; out skel qt;
+               '''
+    elif feature == 'solar_area':
+        return '''[out:json][timeout:25];
+                  area
+                    ["boundary"="administrative"]
+                    ["admin_level"="7"]
+                    ["name"="Lillestrøm"]
+                    ->.boundary;
+
+                  way["power"="generator"]
+                     ["generator:source"="solar"]
+                     (area.boundary);
+                  out skel qt; >; out skel qt;
                '''

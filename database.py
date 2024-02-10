@@ -67,6 +67,13 @@ class Database(object):
                              primary key (tile_hash, feature_name),
                              foreign key (tile_hash) references tile_positions)
                       ''')
+            c.execute('''create table if not exists true_score (
+                             tile_hash string not null,
+                             feature_name string not null,
+                             score real not null,
+                             primary key (tile_hash, feature_name),
+                             foreign key (tile_hash) references tile_positions)
+                      ''')
             c.execute('''create table if not exists scores (
                              tile_hash string not null,
                              feature_name string not null,
@@ -376,3 +383,14 @@ def validation_tiles_for_scoring(cursor, current_model, feature_name):
                    ''',
                    [current_model, feature_name])
     return cursor.fetchall()
+
+def set_true_score(cursor, tile_hash, feature_name, true_score):
+    assert type(tile_hash) == str
+    assert type(feature_name) == str
+    assert type(true_score) == float
+
+    cursor.execute('''insert into true_score
+                      (tile_hash, feature_name, score)
+                      values (?, ?, ?)
+                   ''',
+                   (tile_hash, feature_name, true_score))

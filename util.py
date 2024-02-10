@@ -115,3 +115,42 @@ def tile_to_paths(tile_dir, tile_hash):
     dir_name = tile_hash[:2]
     file_name = tile_hash[2:]
     return tile_dir / f'{dir_name}/{file_name}.jpeg'
+
+
+def bbox_from_way(way):
+    return {
+            'max_lat': max([node['lat'] for node in way['nodes']]),
+            'min_lat': min([node['lat'] for node in way['nodes']]),
+            'max_lon': max([node['lon'] for node in way['nodes']]),
+            'min_lon': min([node['lon'] for node in way['nodes']]),
+            }
+
+
+def ways_from_overpass_data(raw_data):
+    data = json.loads(raw_data)
+
+    nodes = {}
+    ways = {}
+    for element in data['elements']:
+        if element['type'] == 'node':
+            nodes[element['id']] = {
+                    'id': element['id'],
+                    'lat': element['lat'],
+                    'lon': element['lon'],
+                    }
+        elif element['type'] == 'way':
+            ways[element['id']] = element['nodes']
+        else:
+            raise ValueError('Unhandled element type {}'.format(
+                element['type']))
+
+    result = []
+    for way_id in ways:
+        way = ways[way_id]
+        output = {'id': way_id, 'nodes': []}
+        for node_id in way:
+            output['nodes'].append(nodes[node_id])
+
+        result.append(output)
+
+    return result
