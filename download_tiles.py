@@ -122,7 +122,7 @@ def main():
                 if position in already_downloaded:
                     continue
 
-                downloads.total += 1
+                positions.remove(position)
                 positions.append(position)
 
         duration = time.time() - start
