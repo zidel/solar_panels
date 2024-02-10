@@ -33,7 +33,7 @@ class Database(object):
                 return self._cursor
 
             def __exit__(self, type, value, traceback):
-                if type is None:
+                if type is None and value is None and traceback is None:
                     self._cursor.execute('commit')
                     log.debug('Transaction commit')
                 else:
