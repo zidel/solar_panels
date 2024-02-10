@@ -70,7 +70,8 @@ def download_single_tile(image_dir, nib_api_key, z, x, y, retry=True):
             r = requests.get(nib_url(z, x, y, nib_api_key))
         except requests.exceptions.ConnectionError:
             if not retry:
-                log.debug('ConnectionError when downloading tile, won\'t retry')
+                log.debug('ConnectionError when downloading '
+                          'tile, won\'t retry')
                 raise
 
             log.debug('ConnectionError when downloading tile, retrying in 60s')
@@ -79,10 +80,12 @@ def download_single_tile(image_dir, nib_api_key, z, x, y, retry=True):
 
         if not r.ok:
             if not retry:
-                log.debug(f'Reply was status code {r.status_code}, won\'t retry')
+                log.debug(f'Reply was status code {r.status_code}, '
+                          'won\'t retry')
                 r.raise_for_status()
 
-            log.debug(f'Reply was status code {r.status_code}, retrying in 60s')
+            log.debug(f'Reply was status code {r.status_code}, '
+                      'retrying in 60s')
             time.sleep(60)
             continue
 
