@@ -1,5 +1,9 @@
 import datetime
+import logging
 import sqlite3
+
+
+log = logging.getLogger('database')
 
 
 class Database(object):
@@ -24,14 +28,17 @@ class Database(object):
                 self._cursor = cursor
 
             def __enter__(self):
+                log.debug('Transaction start')
                 self._cursor.execute('begin')
                 return self._cursor
 
             def __exit__(self, type, value, traceback):
                 if type is None:
                     self._cursor.execute('commit')
+                    log.debug('Transaction commit')
                 else:
                     self._cursor.execute('rollback')
+                    log.debug('Transaction rollback')
 
         return Transaction(self._cursor())
 

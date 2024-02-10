@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 import pathlib
 import random
 import sys
@@ -63,7 +64,18 @@ def main():
     parser.add_argument('--database', default='data/tiles.db')
     parser.add_argument('--NiB-key', type=str, default="secret/NiB_key.json")
     parser.add_argument('--tile-path', type=str, default='data/images')
+    parser.add_argument('--log', type=str)
     args = parser.parse_args()
+
+    if args.log:
+        logging.basicConfig(
+                filename=args.log,
+                format='%(asctime)s %(name)s %(levelname)s %(message)s',
+                datefmt='%Y-%m-%dT%H:%M:%S',
+                level=logging.DEBUG,
+                )
+    else:
+        logging.basicConfig(level=logging.CRITICAL)
 
     db_path = pathlib.Path(args.database)
     db = database.Database(db_path)
