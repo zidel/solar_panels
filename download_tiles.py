@@ -20,7 +20,13 @@ minimum_image_duration = 1
 
 def download_location(db, image_dir, nib_api_key, z, x, y):
     with db.transaction() as c:
-        timestamp = database.last_checked(c, z, x, y)
+        while True:
+            try:
+                timestamp = database.last_checked(c, z, x, y)
+                break
+            except sqlite3.OperationalError:
+                time.sleep(1)
+
         if timestamp is not None:
             delta = datetime.datetime.now() - timestamp
             if delta < recheck_interval:
