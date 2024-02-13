@@ -49,6 +49,9 @@ data/solar.hdf5 : data/.download.marker train.py Makefile
 data/large_solar.hdf5 : data/.download.marker train.py Makefile
 	./in_container.sh python3 train.py --save-to=data/large_solar.hdf5 --feature=large_solar
 
+data/solar_area.hdf5 : data/.download.marker train.py Makefile
+	./in_container.sh python3 train.py --save-to=data/solar_area.hdf5 --feature=solar_area
+
 data/playground.hdf5 : data/.download.marker train.py Makefile
 	./in_container.sh python3 train.py --save-to=data/playground.hdf5 --feature=playground
 
@@ -61,6 +64,10 @@ data/.score_large_solar.marker : data/large_solar.hdf5 Makefile
 	./in_container.sh python3 confusion_matrix.py --load-model=data/large_solar.hdf5 --feature=large_solar
 	./in_container.sh python3 score_tiles.py --load-model=data/large_solar.hdf5 --feature=large_solar
 	touch data/.score_large_solar.marker
+
+data/.score_solar_area.marker : data/solar_area.hdf5 Makefile
+	./in_container.sh python3 score_tiles.py --load-model=data/solar_area.hdf5 --feature=solar_area
+	touch data/.score_solar_area.marker
 
 data/.score_playground.marker : data/playground.hdf5 Makefile
 	./in_container.sh python3 confusion_matrix.py --load-model=data/playground.hdf5 --feature=playground
