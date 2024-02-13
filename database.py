@@ -127,6 +127,12 @@ class Database(object):
         return (tiles, count)
 
     def tiles_for_review(self, feature_name, limit):
+        if feature_name == 'solar_area':
+            return self.tiles_for_review_area(feature_name, limit)
+        else:
+            return self.tiles_for_review_normal(feature_name, limit)
+
+    def tiles_for_review_normal(self, feature_name, limit):
         review_most_likely = True
 
         ordering = 'abs(score - 0.5) asc'
@@ -180,6 +186,53 @@ class Database(object):
                               limit])
             return c.fetchall()
 
+    def tiles_for_review_area(self, feature_name, limit):
+        with self.transaction('get_tiles_for_review_area') as c:
+            model_query = '''select model_version
+                             from scores
+                             where
+                                 feature_name = ?
+                                 and timestamp in (
+                                     select max(timestamp)
+                                     from scores
+                                     natural left join (
+                                         select 1 as t, tile_hash
+                                         from true_score
+                                         where feature_name = ?)
+                                     where
+                                         t is null
+                                         and feature_name = ?
+                                 )
+                             limit 1
+                          '''
+
+            c.execute(model_query, [feature_name, feature_name, feature_name])
+            model_version = c.fetchone()
+            if model_version is None:
+                return []
+
+            query_fmt = '''select scores.tile_hash, z, x, y, score, model_version
+                           from scores
+                           left join (
+                              select 1 as t, tile_hash
+                              from true_score
+                              where feature_name = ?) as ground_truth
+                           on ground_truth.tile_hash = scores.tile_hash
+                           natural join tile_positions
+                           where t is null
+                                 and feature_name = ?
+                                 and score is not null
+                                 and model_version = ?
+                           order by score desc
+                           limit ?
+                        '''
+            query = query_fmt
+            c.execute(query, [feature_name,
+                              feature_name,
+                              model_version[0],
+                              limit])
+            return c.fetchall()
+
     def tiles_with_solar(self):
         with self.transaction('get_tiles_with_solar') as c:
             c.execute('''select tile_hash
@@ -187,15 +240,6 @@ class Database(object):
                          where has_solar = True
                       ''')
             return c.fetchall()
-
-    def remove_score(self, feature_name, tile_hash):
-        with self.transaction() as c:
-            c.execute('''delete from scores
-                         where
-                             feature_name = ?
-                             and tile_hash = ?
-                      ''',
-                      [feature_name, tile_hash])
 
 
 def get_tile_hash(cursor, z, x, y):
@@ -272,6 +316,18 @@ def add_tile_hash(cursor, z, x, y, tile_hash):
                    (tile_hash, z, x, y, timestamp))
 
 
+def get_score(cursor, tile_hash, feature_name):
+    cursor.execute('''select score
+                      from scores
+                      where
+                          tile_hash = ?
+                          and feature_name = ?
+                   ''',
+                   [tile_hash, feature_name])
+    row = cursor.fetchone()
+    return row[0] if row else None
+
+
 def write_score(cursor, tile_hash, feature_name, score, model_version,
                 timestamp):
     assert type(tile_hash) == str
@@ -290,6 +346,15 @@ def write_score(cursor, tile_hash, feature_name, score, model_version,
                                  timestamp=excluded.timestamp
                    ''',
                    (tile_hash, feature_name, score, model_version, timestamp))
+
+
+def remove_score(cursor, feature_name, tile_hash):
+    cursor.execute('''delete from scores
+                      where
+                          feature_name = ?
+                          and tile_hash = ?
+                   ''',
+                   [feature_name, tile_hash])
 
 
 def set_has_feature(cursor, tile_hash, feature_name, has_feature):
@@ -350,10 +415,10 @@ def mark_checked(cursor, z, x, y):
 
 
 def training_tiles(cursor, feature_name):
-    cursor.execute('''select tile_hash, has_feature, 0
+    cursor.execute('''select tile_hash, score, 0
                       from training_set
                       natural join tile_positions
-                      natural join has_feature
+                      natural join true_score
                       where feature_name = ?
                    ''',
                    [feature_name])
@@ -361,10 +426,10 @@ def training_tiles(cursor, feature_name):
 
 
 def validation_tiles(cursor, feature_name):
-    cursor.execute('''select tile_hash, has_feature, score
+    cursor.execute('''select tile_hash, true_score.score, scores.score
                       from validation_set
                       natural join tile_positions
-                      natural left join has_feature
+                      natural left join true_score
                       natural left join scores
                       where feature_name = ?
                    ''',

@@ -91,6 +91,8 @@ function key_handler(event) {
         review_surrounding_tiles();
     } else if (event.key === "y") {
         submit_result('true');
+    } else if (event.key === "a") {
+        submit_result('accept');
     }
 }
 

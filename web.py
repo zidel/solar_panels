@@ -7,13 +7,14 @@ import flask
 import sqlite3
 
 import database
+import feature
 import util
 
 
 db_path = None
 nib_key_path = None
 tile_path = None
-feature = None
+feature_name = None
 
 
 app = flask.Flask(__name__, static_url_path='')
@@ -32,7 +33,7 @@ def send_script():
 @app.route('/api/review/next_tile')
 def get_next_tile_for_review():
     db = database.Database(db_path)
-    tiles = db.tiles_for_review(feature, limit=1)
+    tiles = db.tiles_for_review(feature_name, limit=1)
     if not tiles:
         return '', 204
 
@@ -66,10 +67,28 @@ def score_neighbours(cursor, own_hash):
                                                          neighbour_y):
                 database.write_score(cursor,
                                      neighbour_hash,
-                                     feature,
+                                     feature_name,
                                      1.0,
                                      'neighbour',
                                      now)
+
+
+def _write_ground_truth(tile_hash, feature_name, response, cursor):
+    if response == 'accept':
+        predicted_score = database.get_score(cursor, tile_hash, feature_name)
+        database.set_true_score(cursor, tile_hash, feature_name, predicted_score)
+    elif response == 'true':
+        database.set_has_feature(cursor, tile_hash, feature_name, True)
+        score_neighbours(cursor, tile_hash)
+    elif response == 'false':
+        if feature_name == 'solar_area':
+            database.set_true_score(cursor, tile_hash, feature_name, 0.0)
+        else:
+            database.set_has_feature(cursor, tile_hash, feature_name, False)
+    elif response == 'skip':
+        database.remove_score(cursor, feature_name, tile_hash)
+    else:
+        raise ValueError
 
 
 @app.route('/api/review/response', methods=['POST'])
@@ -78,26 +97,17 @@ def accept_tile_response():
     tile_hash = body['tile_hash']
     response = body['response']
 
-    if response == 'true':
-        has_feature = True
-    elif response == 'false':
-        has_feature = False
-    elif response == 'skip':
-        has_feature = None
-    else:
-        return 400, 'Bad "response" value'
+    if response not in ['accept', 'false', 'skip', 'true']:
+        return 'Bad "response" value', 400
+
+    if feature_name == 'solar_area' and response == 'true':
+        return 'Can\'t use "true" with solar_area', 400
 
     db = database.Database(db_path)
     while True:
         try:
-            if has_feature is not None:
-                with db.transaction() as c:
-                    database.set_has_feature(c, tile_hash, feature,
-                                             has_feature)
-                    if has_feature:
-                        score_neighbours(c, tile_hash)
-            else:
-                db.remove_score(feature, tile_hash)
+            with db.transaction('write_ground_truth') as c:
+                _write_ground_truth(tile_hash, feature_name, response, c)
             break
         except sqlite3.IntegrityError as e:
             print(e)
@@ -169,6 +179,6 @@ if __name__ == '__main__':
     db_path = pathlib.Path(args.database)
     nib_key_path = pathlib.Path(args.NiB_key)
     tile_path = pathlib.Path(args.tile_path)
-    feature = args.feature
+    feature_name = args.feature
 
     app.run('0.0.0.0', 5000)
