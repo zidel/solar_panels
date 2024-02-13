@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import requests
 import sqlite3
 
@@ -46,6 +47,9 @@ def main():
     parser.add_argument('--feature', type=str, required=True)
     args = parser.parse_args()
 
+    now = datetime.datetime.now()
+    timestamp = now.isoformat()
+
     db = database.Database(args.database)
     overpass_query = feature.overpass_query(args.feature)
     overpass_raw_data = run_overpass_query(overpass_query)
@@ -71,7 +75,12 @@ def main():
             area = tile_scores[(x, y)]
 
             for tile_hash in database.get_tile_hash(c, zoom_level, x, y):
-                database.set_true_score(c, tile_hash, args.feature, area)
+                database.write_score(c,
+                                     tile_hash,
+                                     args.feature,
+                                     area,
+                                     'OSM',
+                                     timestamp)
 
 
 if __name__ == '__main__':
