@@ -60,19 +60,19 @@ def main():
         xtile, ytile = util.deg2tile(point['lat'], point['lon'], args.zoom)
 
         have_tiles = False
-        with db.transaction() as c:
+        with db.transaction('check_for_existing_tiles') as c:
             if database.get_tile_hash(c, args.zoom, xtile, ytile):
                 have_tiles = True
 
         if not have_tiles:
             _, tile_hash = util.download_single_tile(
                     image_dir, nib_api_key, args.zoom, xtile, ytile)
-            with db.transaction() as c:
+            with db.transaction('add_osm_tile') as c:
                 database.add_tile_hash(c, args.zoom, xtile, ytile, tile_hash)
 
         while True:
             try:
-                with db.transaction() as c:
+                with db.transaction('write_fake_score_from_osm') as c:
                     now = datetime.datetime.now()
                     timestamp = now.isoformat()
                     for tile_hash in database.get_tile_hash(

@@ -12,7 +12,7 @@ def check_variants_of_validation_tiles_not_in_training_set(db):
     print('Checking for tiles that should be in the validation set')
 
     failure_count = 0
-    with db.transaction() as c:
+    with db.transaction('fsck_check_train_validate_overlap') as c:
         c.execute('''select count(*)
                      from tile_positions
                      where (z, x, y) not in (
@@ -36,7 +36,7 @@ def tile_hash_not_in_database(db, tile_path):
 
             while True:
                 try:
-                    with db.transaction() as c:
+                    with db.transaction('fsck_check_for_tile_not_in_db') as c:
                         database.get_tile_pos(c, tile_hash)
                     break
                 except sqlite3.OperationalError:
@@ -46,7 +46,7 @@ def tile_hash_not_in_database(db, tile_path):
 def tile_hash_not_on_disk(db, tile_path):
     print('Checking for tiles in the database that are not on disk')
     failure_count = 0
-    with db.transaction() as c:
+    with db.transaction('fsck_check_for_missing_tile_file') as c:
         for tile_hash in database.all_tile_hashes(c):
             image_path = util.tile_to_paths(tile_path, tile_hash)
             if not image_path.exists():

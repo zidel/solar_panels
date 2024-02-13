@@ -144,7 +144,7 @@ def main():
     image_dir = pathlib.Path(args.tile_path)
 
     db = database.Database(args.database)
-    with db.transaction() as c:
+    with db.transaction('get_tiles_for_training') as c:
         training_tiles = format_tile_data(
                 image_dir,
                 database.training_tiles(c, args.feature))

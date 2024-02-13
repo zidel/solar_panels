@@ -65,7 +65,7 @@ def main():
                 except KeyError:
                     tile_scores[(x, y)] = area
 
-    with db.transaction() as c:
+    with db.transaction('write_area_from_osm') as c:
         for x, y in tile_scores:
             database.add_tile(c, zoom_level, x, y)
             area = tile_scores[(x, y)]

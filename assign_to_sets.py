@@ -11,7 +11,7 @@ def main():
     args = parser.parse_args()
 
     db = database.Database(args.database)
-    with db.transaction() as c:
+    with db.transaction('get_tiles_for_assignment') as c:
         c.execute('''select z, x, y
                      from last_update''')
         positions = [(args.feature, z, x, y)
@@ -26,7 +26,7 @@ def main():
     training = positions[validation_size:]
     print(f'Training: {len(training)}')
 
-    with db.transaction() as c:
+    with db.transaction('write_tile_assignments') as c:
         c.executemany('''insert into validation_set
                          (feature_name, z, x, y)
                          values (?, ?, ?, ?)''',

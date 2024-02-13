@@ -19,7 +19,7 @@ minimum_image_duration = 1
 
 
 def download_location(db, image_dir, nib_api_key, z, x, y):
-    with db.transaction() as c:
+    with db.transaction('should_download') as c:
         while True:
             try:
                 timestamp = database.last_checked(c, z, x, y)
@@ -44,7 +44,7 @@ def download_location(db, image_dir, nib_api_key, z, x, y):
         return False
 
     try:
-        with db.transaction() as c:
+        with db.transaction('write_download_result') as c:
             if written:
                 database.add_tile_hash(c, z, x, y, tile_hash)
 
@@ -89,7 +89,7 @@ def main():
     image_dir = pathlib.Path(args.tile_path)
 
     positions = []
-    with db.transaction() as c:
+    with db.transaction('get_tiles_to_download') as c:
         now = datetime.datetime.now()
         for z, x, y in database.all_tiles(c):
             timestamp = database.last_checked(c, z, x, y)

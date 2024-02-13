@@ -105,7 +105,7 @@ def score_tiles(db, image_dir, nib_api_key, feature_name, progress, m,
         results = m.predict(batch, batch_size=batch_size)
         while True:
             try:
-                with db.transaction() as c:
+                with db.transaction('write_predicted_scores') as c:
                     for result in results:
                         tile_data = tiles[image_index]
                         database.write_score(

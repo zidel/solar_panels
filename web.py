@@ -117,7 +117,7 @@ def review_surrounding_tiles():
     db = database.Database(db_path)
     while True:
         try:
-            with db.transaction() as c:
+            with db.transaction('tag_neighbours_for_scoring') as c:
                 score_neighbours(c, tile_hash)
             break
         except sqlite3.OperationalError:
@@ -142,7 +142,7 @@ def get_nib_tile(z, x, y):
     y = int(y)
 
     db = database.Database(db_path)
-    with db.transaction() as cursor:
+    with db.transaction('get_tile_hashes_from_position') as cursor:
         tiles = database.get_tile_hash(cursor, z, x, y)
 
     if tiles:
@@ -152,7 +152,7 @@ def get_nib_tile(z, x, y):
         written, tile_hash = util.download_single_tile(
                 tile_path, nib_api_key, z, x, y)
         if written:
-            with db.transaction() as cursor:
+            with db.transaction('add_downloaded_tile_web_by_pos') as cursor:
                 database.add_tile_hash(cursor, z, x, y, tile_hash)
 
     return flask.redirect(f'/api/tiles/by-hash/{tile_hash}.jpeg', code=307)

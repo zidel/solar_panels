@@ -92,7 +92,7 @@ def main():
     data = read_data(data_path, data_class, min_count)
     for piece in tqdm.tqdm(data):
         def per_tile(z, x, y):
-            with db.transaction() as cursor:
+            with db.transaction('add_imported_tile') as cursor:
                 database.add_tile(cursor, z, x, y)
 
         for_each_tile(piece, per_tile)

@@ -101,7 +101,7 @@ def main():
     nib_api_key = util.load_key(args.NiB_key)
     image_dir = pathlib.Path(args.tile_path)
 
-    with db.transaction() as c:
+    with db.transaction('get_validation_tiles_for_scoring') as c:
         tiles_for_scoring = database.validation_tiles_for_scoring(
                 c, model_version, args.feature)
 
@@ -122,7 +122,7 @@ def main():
     finally:
         progress.clear()
 
-    with db.transaction() as c:
+    with db.transaction('get_validation_tiles') as c:
         tiles = database.validation_tiles(c, args.feature)
 
     tiles = [tile for tile in tiles if tile[2] is not None]

@@ -22,28 +22,29 @@ class Database(object):
         c.execute('pragma foreign_keys = true')
         return c
 
-    def transaction(self):
+    def transaction(self, name):
         class Transaction(object):
-            def __init__(self, cursor):
+            def __init__(self, cursor, name):
                 self._cursor = cursor
+                self._name = name
 
             def __enter__(self):
-                log.debug('Transaction start')
+                log.debug('Transaction start, %s', self._name)
                 self._cursor.execute('begin')
                 return self._cursor
 
             def __exit__(self, type, value, traceback):
                 if type is None and value is None and traceback is None:
                     self._cursor.execute('commit')
-                    log.debug('Transaction commit')
+                    log.debug('Transaction commit, %s', self._name)
                 else:
                     self._cursor.execute('rollback')
-                    log.debug('Transaction rollback')
+                    log.debug('Transaction rollback, %s', self._name)
 
-        return Transaction(self._cursor())
+        return Transaction(self._cursor(), name)
 
     def _init_database(self):
-        with self.transaction() as c:
+        with self.transaction('create_tables') as c:
             c.execute('''create table if not exists last_update (
                              z integer not null,
                              x integer not null,
@@ -113,7 +114,7 @@ class Database(object):
                            or model_version != ?
                        {}
                     '''
-        with self.transaction() as c:
+        with self.transaction('get_tiles_for_scoring') as c:
             c.execute(query_fmt.format('count(*)', ''),
                       [feature_name, current_model])
             count = c.fetchone()[0]
@@ -132,7 +133,7 @@ class Database(object):
         if review_most_likely:
             ordering = 'score desc'
 
-        with self.transaction() as c:
+        with self.transaction('get_tiles_for_review_normal') as c:
             model_query = '''select model_version
                              from scores
                              where
@@ -180,7 +181,7 @@ class Database(object):
             return c.fetchall()
 
     def tiles_with_solar(self):
-        with self.transaction() as c:
+        with self.transaction('get_tiles_with_solar') as c:
             c.execute('''select tile_hash
                          from with_solar
                          where has_solar = True
