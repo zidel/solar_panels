@@ -42,6 +42,8 @@ def download_location(db, image_dir, nib_api_key, z, x, y):
                 image_dir, nib_api_key, z, x, y, retry=False)
     except requests.exceptions.ConnectionError:
         return False
+    except requests.HTTPError:
+        return False
 
     try:
         with db.transaction('write_download_result') as c:
