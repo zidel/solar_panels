@@ -124,8 +124,13 @@ def main():
                 if position in already_downloaded:
                     continue
 
-                positions.remove(position)
-                positions.append(position)
+                try:
+                    positions.remove(position)
+                    positions.append(position)
+                except ValueError:
+                    # This position was not originally scheduled for download,
+                    # so don't add it to the queue now
+                    pass
 
         duration = time.time() - start
         if duration < minimum_image_duration:
