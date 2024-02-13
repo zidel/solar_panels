@@ -5,6 +5,7 @@ import sys
 import tensorflow
 
 import database
+import feature
 import model
 import score_tiles
 import util
@@ -114,7 +115,9 @@ def main():
                 nib_api_key,
                 args.feature,
                 progress,
-                model.get(args.model, args.load_model),
+                model.get(args.model,
+                          feature.model_output_type(args.feature),
+                          args.load_model),
                 model_version,
                 args.batch_size,
                 None,

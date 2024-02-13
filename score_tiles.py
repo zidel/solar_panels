@@ -144,7 +144,9 @@ def main():
     nib_api_key = util.load_key(args.NiB_key)
     image_dir = pathlib.Path(args.tile_path)
 
-    m = model.get(args.model, args.load_model)
+    m = model.get(args.model,
+                  feature.model_output_type(args.feature),
+                  args.load_model)
 
     progress = Progress()
     try:

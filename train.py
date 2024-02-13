@@ -182,7 +182,10 @@ def main():
                 num_parallel_calls=tf.data.AUTOTUNE)
         validation_data = validation_data.batch(args.batch_size)
 
-    m = model.get(args.model, args.load_model, args.learning_rate)
+    m = model.get(args.model,
+                  feature.model_output_type(args.feature_name),
+                  args.load_model,
+                  args.learning_rate)
 
     if args.tensorboard is None:
         tensorboard_name = '{}'.format(datetime.datetime.now())

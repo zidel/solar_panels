@@ -46,3 +46,12 @@ def overpass_query(feature):
                      (area.boundary);
                   out skel qt; >; out skel qt;
                '''
+
+
+def model_output_type(feature):
+    return {
+            'large_solar': 'probability',
+            'playground': 'probability',
+            'solar_area': 'area',
+            'solar': 'probability',
+            }[feature]
