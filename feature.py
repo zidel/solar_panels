@@ -35,15 +35,10 @@ def overpass_query(feature):
                '''
     elif feature == 'solar_area':
         return '''[out:json][timeout:25];
-                  area
-                    ["boundary"="administrative"]
-                    ["admin_level"="7"]
-                    ["name"="Lillestrøm"]
-                    ->.boundary;
-
+                  area(id:3602978650)->.searchArea;
                   way["power"="generator"]
                      ["generator:source"="solar"]
-                     (area.boundary);
+                     (area.searchArea);
                   out skel qt; >; out skel qt;
                '''
 
