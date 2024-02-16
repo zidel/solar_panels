@@ -44,6 +44,7 @@ def intersect_way_with_tile(db, way, tile):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--database', default='data/tiles.db')
+    parser.add_argument('--cutoff', default=0.0)
     parser.add_argument('--feature', type=str, required=True)
     args = parser.parse_args()
 
@@ -73,6 +74,8 @@ def main():
         for x, y in tile_scores:
             database.add_tile(c, zoom_level, x, y)
             area = tile_scores[(x, y)]
+            if area < args.cutoff:
+                continue
 
             for tile_hash in database.get_tile_hash(c, zoom_level, x, y):
                 database.write_score(c,
