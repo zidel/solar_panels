@@ -20,12 +20,12 @@ minimum_image_duration = 1
 
 def download_location(db, image_dir, nib_api_key, z, x, y):
     with db.transaction('should_download') as c:
-        while True:
-            try:
-                timestamp = database.last_checked(c, z, x, y)
-                break
-            except sqlite3.OperationalError:
-                time.sleep(1)
+        try:
+            timestamp = database.last_checked(c, z, x, y)
+        except sqlite3.OperationalError as e:
+            logging.debug('Failed when checking if tile should be downloaded',
+                          exc_info=e)
+            return False
 
         if timestamp is not None:
             delta = datetime.datetime.now() - timestamp
@@ -51,8 +51,9 @@ def download_location(db, image_dir, nib_api_key, z, x, y):
                 database.add_tile_hash(c, z, x, y, tile_hash)
 
             database.mark_checked(c, z, x, y)
-    except sqlite3.OperationalError:
+    except sqlite3.OperationalError as e:
         # Ignore it and try again in the next round of downloads
+        logging.debug('Failed when writing download result', exc_info=e)
         return False
 
     return written
