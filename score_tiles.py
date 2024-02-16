@@ -119,9 +119,8 @@ def score_tiles(db, image_dir, nib_api_key, feature_name, progress, m,
                         image_index += 1
                         progress.finished(1, float(result), tile_data[1])
                 break
-            except sqlite3.OperationalError as e:
-                print(e)
-                continue
+            except sqlite3.OperationalError:
+                raise
 
         if limit and image_index >= limit:
             break
