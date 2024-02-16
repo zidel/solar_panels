@@ -214,7 +214,12 @@ class Database(object):
             if model_version is None:
                 return []
 
-            query_fmt = '''select scores.tile_hash, z, x, y, score, model_version
+            query_fmt = '''select scores.tile_hash,
+                                  z,
+                                  x,
+                                  y,
+                                  score,
+                                  model_version
                            from scores
                            left join (
                               select 1 as t, tile_hash
