@@ -6,6 +6,7 @@ import pathlib
 import tensorflow as tf
 
 import database
+import feature
 import model
 import util
 
@@ -183,7 +184,7 @@ def main():
         validation_data = validation_data.batch(args.batch_size)
 
     m = model.get(args.model,
-                  feature.model_output_type(args.feature_name),
+                  feature.result_type(args.feature),
                   args.load_model,
                   args.learning_rate)
 

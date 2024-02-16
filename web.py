@@ -7,7 +7,6 @@ import flask
 import sqlite3
 
 import database
-import feature
 import util
 
 

@@ -116,7 +116,7 @@ def main():
                 args.feature,
                 progress,
                 model.get(args.model,
-                          feature.model_output_type(args.feature),
+                          feature.result_type(args.feature),
                           args.load_model),
                 model_version,
                 args.batch_size,

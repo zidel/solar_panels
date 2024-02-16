@@ -146,7 +146,7 @@ def main():
     image_dir = pathlib.Path(args.tile_path)
 
     m = model.get(args.model,
-                  feature.model_output_type(args.feature),
+                  feature.result_type(args.feature),
                   args.load_model)
 
     progress = Progress()

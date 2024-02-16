@@ -43,7 +43,7 @@ def overpass_query(feature):
                '''
 
 
-def model_output_type(feature):
+def result_type(feature):
     return {
             'large_solar': 'probability',
             'playground': 'probability',

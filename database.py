@@ -2,6 +2,8 @@ import datetime
 import logging
 import sqlite3
 
+import feature
+
 
 log = logging.getLogger('database')
 
@@ -416,25 +418,49 @@ def mark_checked(cursor, z, x, y):
 
 
 def training_tiles(cursor, feature_name):
-    cursor.execute('''select tile_hash, score, 0
-                      from training_set
-                      natural join tile_positions
-                      natural join true_score
-                      where feature_name = ?
-                   ''',
-                   [feature_name])
+    if feature.result_type(feature_name) == 'probability':
+        cursor.execute('''select tile_hash, has_feature, 0
+                          from training_set
+                          natural join tile_positions
+                          natural join has_feature
+                          where feature_name = ?
+                       ''',
+                       [feature_name])
+    elif feature.result_type(feature_name) == 'area':
+        cursor.execute('''select tile_hash, score, 0
+                          from training_set
+                          natural join tile_positions
+                          natural join true_score
+                          where feature_name = ?
+                       ''',
+                       [feature_name])
+    else:
+        raise RuntimeError
+
     return cursor.fetchall()
 
 
 def validation_tiles(cursor, feature_name):
-    cursor.execute('''select tile_hash, true_score.score, scores.score
-                      from validation_set
-                      natural join tile_positions
-                      natural left join true_score
-                      natural left join scores
-                      where feature_name = ?
-                   ''',
-                   [feature_name])
+    if feature.result_type(feature_name) == 'probability':
+        cursor.execute('''select tile_hash, has_feature, score
+                          from validation_set
+                          natural join tile_positions
+                          natural left join has_feature
+                          natural left join scores
+                          where feature_name = ?
+                       ''',
+                       [feature_name])
+    elif feature.result_type(feature_name) == 'area':
+        cursor.execute('''select tile_hash, true_score.score, scores.score
+                          from validation_set
+                          natural join tile_positions
+                          natural left join true_score
+                          natural left join scores
+                          where feature_name = ?
+                       ''',
+                       [feature_name])
+    else:
+        raise RuntimeError
     return cursor.fetchall()
 
 
@@ -450,6 +476,7 @@ def validation_tiles_for_scoring(cursor, current_model, feature_name):
                    ''',
                    [current_model, feature_name])
     return cursor.fetchall()
+
 
 def set_true_score(cursor, tile_hash, feature_name, true_score):
     assert type(tile_hash) == str

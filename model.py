@@ -112,7 +112,7 @@ def inception_resnet_v2(input_layer, input_shape):
             )
 
 
-def get(model_type, output_type, weights_from=None, learning_rate=1e-4):
+def get(model_type, result_type, weights_from=None, learning_rate=1e-4):
     input_shape = (256, 256, 3)
     inputs = keras.layers.Input(input_shape)
 
@@ -132,9 +132,9 @@ def get(model_type, output_type, weights_from=None, learning_rate=1e-4):
     dense_1 = keras.layers.Dense(dense_width, activation='relu')(flatten)
     dense_2 = keras.layers.Dense(dense_width, activation='relu')(dense_1)
 
-    if output_type == 'probability':
+    if result_type == 'probability':
         dense_3 = keras.layers.Dense(1, activation='sigmoid')(dense_2)
-    elif output_type == 'area':
+    elif result_type == 'area':
         dense_3 = keras.layers.Dense(1, activation='relu')(dense_2)
 
     model = keras.models.Model(inputs=inputs, outputs=dense_3)
