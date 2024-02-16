@@ -38,7 +38,7 @@ class Database(object):
                 if type is None and value is None and traceback is None:
                     try:
                         self._cursor.execute('commit')
-                    except sqlite3.OperationalError as e:
+                    except sqlite3.OperationalError:
                         self._cursor.execute('rollback')
                         raise
                 else:
