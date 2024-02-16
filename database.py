@@ -29,17 +29,18 @@ class Database(object):
                 self._name = name
 
             def __enter__(self):
-                log.debug('Transaction start, %s', self._name)
                 self._cursor.execute('begin')
                 return self._cursor
 
             def __exit__(self, type, value, traceback):
                 if type is None and value is None and traceback is None:
-                    self._cursor.execute('commit')
-                    log.debug('Transaction commit, %s', self._name)
+                    try:
+                        self._cursor.execute('commit')
+                    except sqlite3.OperationalError as e:
+                        self._cursor.execute('rollback')
+                        raise
                 else:
                     self._cursor.execute('rollback')
-                    log.debug('Transaction rollback, %s', self._name)
 
         return Transaction(self._cursor(), name)
 
