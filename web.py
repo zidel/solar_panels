@@ -75,7 +75,10 @@ def score_neighbours(cursor, own_hash):
 def _write_ground_truth(tile_hash, feature_name, response, cursor):
     if response == 'accept':
         predicted_score = database.get_score(cursor, tile_hash, feature_name)
-        database.set_true_score(cursor, tile_hash, feature_name, predicted_score)
+        database.set_true_score(cursor,
+                                tile_hash,
+                                feature_name,
+                                predicted_score)
     elif response == 'true':
         database.set_has_feature(cursor, tile_hash, feature_name, True)
         score_neighbours(cursor, tile_hash)
