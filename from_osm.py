@@ -4,6 +4,7 @@ import json
 import pathlib
 import requests
 import sqlite3
+import time
 
 import tqdm
 
@@ -80,8 +81,11 @@ def main():
                         database.write_score(c, tile_hash, args.feature, 1.0,
                                              'OSM', timestamp)
             except sqlite3.OperationalError as e:
-                print(e)
-                continue
+                if database.temporary_error(e):
+                    time.sleep(1)
+                    continue
+                else:
+                    raise
             break
 
 

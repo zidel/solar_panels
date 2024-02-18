@@ -8,6 +8,14 @@ import feature
 log = logging.getLogger('database')
 
 
+def temporary_error(sqlite_exception):
+    temporary_errors = [
+            (sqlite3.OperationalError, 'SQLITE_BUSY'),
+            ]
+    error = (type(sqlite_exception), sqlite_exception.sqlite_errorname)
+    return error in temporary_errors
+
+
 class Database(object):
     def __init__(self, path):
         self._db = sqlite3.Connection(path)
