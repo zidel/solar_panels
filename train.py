@@ -35,48 +35,51 @@ def load_image_data(tile_data):
     return (nib_data, correct)
 
 
-def apply_rotation(tiles, add_up_to=-1):
+def apply_rotation(tiles, add_up_to=None):
     output = list(tiles)
     for tile in tiles:
         for rotations in range(1, 4):
-            if add_up_to == 0:
+            if add_up_to is not None and add_up_to <= 0:
                 return output
 
             copy = list(tile)
             copy[2] = str(rotations)
             output.append(tuple(copy))
 
-            add_up_to -= 1
+            if add_up_to is not None:
+                add_up_to -= 1
 
     return output
 
 
-def apply_horizontal_flips(tiles, add_up_to=-1):
+def apply_horizontal_flips(tiles, add_up_to=None):
     output = list(tiles)
     for tile in tiles:
-        if add_up_to == 0:
+        if add_up_to is not None and add_up_to <= 0:
             break
 
         copy = list(tile)
         copy[3] = '1'
         output.append(tuple(copy))
 
-        add_up_to -= 1
+        if add_up_to is not None:
+            add_up_to -= 1
 
     return output
 
 
-def apply_vertical_flips(tiles, add_up_to=-1):
+def apply_vertical_flips(tiles, add_up_to=None):
     output = list(tiles)
     for tile in tiles:
-        if add_up_to == 0:
+        if add_up_to is not None and add_up_to <= 0:
             break
 
         copy = list(tile)
         copy[4] = '1'
         output.append(tuple(copy))
 
-        add_up_to -= 1
+        if add_up_to is not None:
+            add_up_to -= 1
 
     return output
 
