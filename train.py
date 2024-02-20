@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 import math
 import pathlib
 
@@ -89,23 +90,26 @@ def augment_tiles(tiles, background_scale):
         else:
             non_solar.append(data)
 
+    logging.debug('Augmentation started with %s positive and %s '
+                  'negative tiles',
+                  len(solar),
+                  len(non_solar))
+
     solar = apply_rotation(solar)
     solar = apply_horizontal_flips(solar)
     solar = apply_vertical_flips(solar)
+    logging.debug('Augmented positive tiles to %s', len(solar))
 
-    print(f'Initially: {len(solar)}S, {len(non_solar)}BG')
     target_count = int(background_scale * len(solar))
-    print('Want to scale background to {}, {:.3f}'.format(
-        target_count,
-        target_count / len(non_solar)))
+    logging.debug('Want to scale negative tiles to %s, %s%%',
+                  target_count,
+                  target_count / len(non_solar))
 
     non_solar = apply_horizontal_flips(non_solar,
                                        target_count - len(non_solar))
     non_solar = apply_rotation(non_solar, target_count - len(non_solar))
     non_solar = apply_vertical_flips(non_solar, target_count - len(non_solar))
-
-    bg_ratio = len(non_solar) / len(solar)
-    print(f'Result: {len(solar)}S, {len(non_solar)}BG, {bg_ratio}')
+    logging.debug('Augmented negative tiles to %s', len(non_solar))
 
     return solar + non_solar
 
@@ -135,12 +139,23 @@ def main():
     parser.add_argument('--save-to', type=str, default='data/model.hdf5')
     parser.add_argument('--tensorboard', type=str, default=None)
     parser.add_argument('--feature', type=str, required=True)
+    parser.add_argument('--log', type=str)
 
     parser.add_argument('--batch-size', default=256, type=int)
     parser.add_argument('--step-count', default=500000, type=int)
     parser.add_argument('--learning-rate', default=1e-4, type=float)
     parser.add_argument('--background-scale', default=1.0, type=float)
     args = parser.parse_args()
+
+    if args.log:
+        logging.basicConfig(
+                filename=args.log,
+                format='%(asctime)s %(name)s %(levelname)s %(message)s',
+                datefmt='%Y-%m-%dT%H:%M:%S',
+                level=logging.DEBUG,
+                )
+    else:
+        logging.basicConfig(level=logging.CRITICAL)
 
     image_dir = pathlib.Path(args.tile_path)
 
@@ -153,6 +168,7 @@ def main():
                 image_dir,
                 database.validation_tiles(c, args.feature))
 
+    logging.debug('Augmenting training tiles')
     training_tiles = augment_tiles(training_tiles, args.background_scale)
     print('Training with {} tiles, validating with {}'.format(
         len(training_tiles),
