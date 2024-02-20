@@ -40,20 +40,20 @@ data/.tile_import.marker : import_tiles.py database.py util.py population.csv bu
 	touch data/.tile_import.marker
 
 data/.download.marker : data/.tile_import.marker download_tiles.py database.py util.py Makefile
-	python3 download_tiles.py
+	python3 download_tiles.py --log download.log
 	touch data/.download.marker
 
 data/solar.hdf5 : data/.download.marker train.py Makefile
-	./in_container.sh python3 train.py --save-to=data/solar.hdf5 --feature=solar
+	./in_container.sh python3 train.py --save-to=data/solar.hdf5 --feature=solar --log train.log
 
 data/large_solar.hdf5 : data/.download.marker train.py Makefile
-	./in_container.sh python3 train.py --save-to=data/large_solar.hdf5 --feature=large_solar
+	./in_container.sh python3 train.py --save-to=data/large_solar.hdf5 --feature=large_solar --log train.log
 
 data/solar_area.hdf5 : data/.download.marker train.py Makefile
-	./in_container.sh python3 train.py --save-to=data/solar_area.hdf5 --feature=solar_area
+	./in_container.sh python3 train.py --save-to=data/solar_area.hdf5 --feature=solar_area --log train.log
 
 data/playground.hdf5 : data/.download.marker train.py Makefile
-	./in_container.sh python3 train.py --save-to=data/playground.hdf5 --feature=playground
+	./in_container.sh python3 train.py --save-to=data/playground.hdf5 --feature=playground --log train.log
 
 data/.score_solar.marker : data/solar.hdf5 Makefile
 	./in_container.sh python3 confusion_matrix.py --load-model=data/solar.hdf5 --feature=solar
