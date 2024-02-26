@@ -139,14 +139,23 @@ def get(model_type, result_type, weights_from=None, learning_rate=1e-4):
 
     model = keras.models.Model(inputs=inputs, outputs=dense_3)
 
-    metrics = [
-            keras.metrics.Recall(),
-            keras.metrics.Precision(),
-            ]
-    model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
-            loss=keras.losses.BinaryCrossentropy(),
-            metrics=metrics)
+    if result_type == 'probability':
+        metrics = [
+                keras.metrics.Recall(),
+                keras.metrics.Precision(),
+                ]
+        model.compile(
+                optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
+                loss=keras.losses.BinaryCrossentropy(),
+                metrics=metrics)
+    elif result_type == 'area':
+        metrics = [
+                keras.metrics.MeanSquaredError(),
+                ]
+        model.compile(
+                optimizer=keras.optimizers.Adagrad(learning_rate=learning_rate),
+                loss=keras.losses.MeanSquaredError(),
+                metrics=metrics)
 
     if weights_from:
         model.load_weights(weights_from)
