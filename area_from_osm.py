@@ -4,6 +4,7 @@ import requests
 import sqlite3
 
 import shapely
+import tqdm
 
 import feature
 import database
@@ -71,7 +72,7 @@ def main():
                     tile_scores[(x, y)] = area
 
     with db.transaction('write_area_from_osm') as c:
-        for x, y in tile_scores:
+        for x, y in tqdm.tqdm(tile_scores):
             database.add_tile(c, zoom_level, x, y)
             area = tile_scores[(x, y)]
             if area < args.cutoff:
