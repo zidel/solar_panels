@@ -16,15 +16,7 @@ def overpass_query(feature):
                      (area.searchArea);
                   out ids center qt; >; out skel qt;
                '''
-    elif feature == 'solar' or feature == 'large_solar':
-        return '''[out:json][timeout:25];
-                  area(id:3602978650)->.searchArea;
-                  way["power"="generator"]
-                     ["generator:type"="solar_photovoltaic_panel"]
-                     (area.searchArea);
-                  out ids center qt; >; out skel qt;
-               '''
-    elif feature == 'solar_area':
+    elif feature in ['solar', 'large_solar', 'solar_area']:
         return '''[out:json][timeout:25];
                   area(id:3602978650)->.searchArea;
                   way["power"="generator"]
