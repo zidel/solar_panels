@@ -153,7 +153,8 @@ def get(model_type, result_type, weights_from=None, learning_rate=1e-4):
                 keras.metrics.MeanSquaredError(),
                 ]
         model.compile(
-                optimizer=keras.optimizers.Adagrad(learning_rate=learning_rate),
+                optimizer=keras.optimizers.Adagrad(
+                    learning_rate=learning_rate),
                 loss=keras.losses.MeanSquaredError(),
                 metrics=metrics)
 
