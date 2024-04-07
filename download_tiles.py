@@ -127,11 +127,9 @@ def main():
 
                 try:
                     positions.remove(position)
-                    positions.append(position)
                 except ValueError:
-                    # This position was not originally scheduled for download,
-                    # so don't add it to the queue now
                     pass
+                positions.append(position)
 
         duration = time.time() - start
         if duration < minimum_image_duration:
