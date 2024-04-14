@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 import pathlib
 import random
 
@@ -160,6 +161,7 @@ def get_nib_tile(z, x, y):
     if tiles:
         tile_hash = random.choice(tiles)
     else:
+        print(f'No tiles found for {z}/{x}/{y}, trying to download')
         nib_api_key = util.load_key(nib_key_path)
         written, tile_hash = util.download_single_tile(
                 tile_path, nib_api_key, z, x, y)
@@ -177,6 +179,8 @@ if __name__ == '__main__':
     parser.add_argument('--tile-path', type=str, default='data/images')
     parser.add_argument('--feature', type=str, required=True)
     args = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG)
 
     db_path = pathlib.Path(args.database)
     nib_key_path = pathlib.Path(args.NiB_key)
