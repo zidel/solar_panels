@@ -67,19 +67,19 @@ def main():
     if args.population:
         data_path = 'population.csv'
         data_class = 'pop_tot'
-        min_count = 10000
+        min_count = 3000
     elif args.buildings:
         data_path = 'buildings.csv'
         data_class = 'bui0all'
-        min_count = 5000
+        min_count = 2000
     elif args.industrial_buildings:
         data_path = 'buildings.csv'
         data_class = 'bui1ind'
-        min_count = 400
+        min_count = 300
     elif args.businesses:
         data_path = 'businesses.csv'
         data_class = 'est_tot'
-        min_count = 500
+        min_count = 200
     else:
         raise AssertionError
 
